@@ -1,0 +1,5 @@
+{
+  "env_vars": {
+    "SLACK_WEBHOOK_URL": ""
+  }
+}

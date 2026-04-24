@@ -1,0 +1,21 @@
+{
+  "name": "projects-dashboard",
+  "version": "1.0.0",
+  "description": "Central hub for all RevGravy projects with auto-updating dashboard",
+  "main": "scripts/generate-dashboard.js",
+  "scripts": {
+    "generate": "node scripts/generate-dashboard.js",
+    "post-slack": "node scripts/post-to-slack.js",
+    "dashboard": "npm run generate && npm run post-slack"
+  },
+  "keywords": [
+    "dashboard",
+    "projects",
+    "productivity"
+  ],
+  "author": "phil@revgravy.com",
+  "license": "MIT",
+  "dependencies": {
+    "js-yaml": "^4.1.0"
+  }
+}

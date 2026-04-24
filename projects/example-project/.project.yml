@@ -1,0 +1,8 @@
+name: "Example Project"
+goal: "Learn how this dashboard system works"
+status: "active"
+last_edited: "2026-04-24"
+last_action: "Initialized example project"
+github_url: "https://github.com/user/example-project"
+local_path: "/Users/work/projects-dashboard/projects/example-project"
+tags: ["example", "documentation"]

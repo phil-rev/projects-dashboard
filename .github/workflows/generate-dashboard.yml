@@ -1,0 +1,46 @@
+name: Generate Dashboard
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "projects/**/.project.yml"
+      - "scripts/generate-dashboard.js"
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Generate dashboard
+        run: npm run generate
+
+      - name: Commit and push
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "Dashboard Bot"
+          git add dashboard.html
+          git diff --quiet && git diff --staged --quiet || (git commit -m "chore: auto-generate dashboard" && git push)
+
+      - name: Post to Slack
+        if: always()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          DASHBOARD_URL: "https://phil.github.io/projects-dashboard/"
+        run: |
+          if [ -n "$SLACK_WEBHOOK_URL" ]; then
+            npm run post-slack
+          else
+            echo "Slack webhook not configured, skipping Slack post"
+          fi
