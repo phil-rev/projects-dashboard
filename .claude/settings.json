@@ -1,5 +1,17 @@
 {
   "env_vars": {
     "SLACK_WEBHOOK_URL": ""
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /Users/work/projects-dashboard/scripts/detect-project.sh 2>/dev/null && echo '{\"hookSpecificOutput\": {\"hookEventName\": \"SessionStart\", \"additionalContext\": \"USER IS IN A TRACKED PROJECT. Ask at the start of this session: Are you (1) starting a new project, (2) resuming an existing project, or (3) just having a miscellaneous chat? Based on their answer, load project context or skip tracking. Store their choice for use at session end.\"}}' || true"
+          }
+        ]
+      }
+    ]
   }
 }
