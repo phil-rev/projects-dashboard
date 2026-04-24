@@ -1,0 +1,8 @@
+name: "RevGravy OS"
+goal: "Central operational brain for RevGravy—contains methodology, client knowledge, playbooks, and agent instructions for building Revenue Factories inside HubSpot"
+status: "active"
+last_edited: "2026-04-24"
+last_action: "Added to projects dashboard"
+github_url: "https://github.com/phil-rev/rg-os"
+local_path: "/Users/work/git-practice/rg-os"
+tags: ["core-system", "methodology", "hubspot", "playbooks"]

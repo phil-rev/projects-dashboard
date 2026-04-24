@@ -1,0 +1,7 @@
+name: "HubSpot Demo Account"
+goal: "Testing and sandbox environment for HubSpot configurations. Creates demo activities and engagement records to validate factory builds and RevGravy implementations before deploying to production."
+status: "active"
+last_edited: "2026-04-24"
+last_action: "Added to projects dashboard"
+local_path: "/Users/work/hubspot-demo-account"
+tags: ["testing", "hubspot", "sandbox", "utilities"]
