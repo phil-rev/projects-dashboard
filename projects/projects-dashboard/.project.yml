@@ -1,8 +1,8 @@
 name: "Projects Dashboard"
 goal: "Central hub for all RevGravy projects—tracks metadata, generates daily dashboard, integrates with Slack, and provides Claude session hooks"
 status: "active"
-last_edited: "2026-04-24"
-last_action: "Created as tracked project in dashboard system"
+last_edited: "2026-04-25"
+last_action: "Made projects-dashboard a tracked project, renamed Proposal Agent, removed example-project, redesigned with dark minimal theme"
 github_url: "https://github.com/phil-rev/projects-dashboard"
 local_path: "/Users/work/projects-dashboard"
 tags: ["meta", "dashboard", "system", "automation"]
