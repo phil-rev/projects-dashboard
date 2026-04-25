@@ -6,6 +6,8 @@ on:
     paths:
       - "projects/**/.project.yml"
       - "scripts/generate-dashboard.js"
+  schedule:
+    - cron: "0 9 * * *"
   workflow_dispatch:
 
 jobs:
