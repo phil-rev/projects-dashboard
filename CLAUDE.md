@@ -81,9 +81,47 @@ Run `scripts/generate-dashboard.js` to:
 
 Hosted on GitHub Pages at: `https://phil.github.io/projects-dashboard/` (once configured)
 
+## The /close-project Command
+
+**When to use**: At the end of a work session on a tracked project, run:
+```
+/close-project
+```
+
+**What happens**:
+1. I review our conversation transcript
+2. Extract what was accomplished (features, fixes, docs, etc.)
+3. Identify any blockers or next steps
+4. **Automatically update**:
+   - `.project.yml` → `last_action` + `last_edited`
+   - `README.md` → Add progress entry
+   - Regenerate `dashboard.html`
+   - Post updated dashboard to Slack
+
+**No repetition needed** — I pull everything from our actual conversation, so you don't have to tell me what you did.
+
+**Example**:
+```
+You: /close-project
+
+Claude: Reviewing session... found:
+- Built proposal generator agent
+- Fixed Gamma API timeout handling
+- Added 3 unit tests
+- Next: integration tests with production Gamma
+
+✓ Updated .project.yml
+✓ Updated README.md  
+✓ Regenerated dashboard
+✓ Posted to Slack
+```
+
+---
+
 ## Notes
 
 - Projects can be local directories, Git submodules, or symlinks to external repos
 - All metadata is YAML for easy parsing and human-readability
 - Dashboard is static HTML (fast, portable, GitHub Pages friendly)
 - Slack integration is optional but highly recommended
+- Use `/close-project` at the end of every session to keep metadata fresh
