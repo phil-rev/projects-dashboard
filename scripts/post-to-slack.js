@@ -10,7 +10,7 @@ if (!SLACK_WEBHOOK_URL) {
   process.exit(1);
 }
 
-const dashboardUrl = process.env.DASHBOARD_URL || "https://phil.github.io/projects-dashboard/";
+const dashboardUrl = process.env.DASHBOARD_URL || "https://phil-rev.github.io/projects-dashboard/dashboard.html";
 
 const payload = {
   text: "📊 Your projects dashboard is ready",
