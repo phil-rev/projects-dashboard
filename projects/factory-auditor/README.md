@@ -14,6 +14,7 @@ Factory Auditor takes RevGravy's revenue factory IP and uses it to audit HubSpot
 - **Audit Scoring**: Grades how well a HubSpot instance reflects the predicted factory architecture
 
 ## Next Steps
+- [ ] **Create PRD** — Detailed product requirements document (scope, features, inputs/outputs, success metrics)
 - [ ] Define factory templates and patterns
 - [ ] Build GTM analyzer to classify client motion
 - [ ] Create HubSpot API audit module
