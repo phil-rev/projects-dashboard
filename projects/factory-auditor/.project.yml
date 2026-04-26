@@ -2,5 +2,5 @@ name: "Factory Auditor"
 goal: "Grade HubSpot instances based on RevGravy revenue factory design principles. Analyzes a client's GTM motion, predicts appropriate factories, and audits the implementation against best practices."
 status: "active"
 last_edited: "2026-04-26"
-last_action: "Project created"
+last_action: "Project initialized with framework docs and next steps (PRD creation)"
 tags: ["hubspot", "revenue-factory", "consulting", "audit", "gtm"]
