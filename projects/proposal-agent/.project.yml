@@ -1,8 +1,8 @@
 name: "Proposal Agent (AICB project)"
 goal: "Agent that automates proposal generation for prospects via Gamma.app API. Eliminates manual proposal creation workflows and enables rapid, personalized proposal generation."
 status: "active"
-last_edited: "2026-04-24"
-last_action: "Added to projects dashboard"
-github_url: "https://github.com/phil-rev/aicareercourse"
-local_path: "/Users/work/AIcareerCourse"
+last_edited: "2026-04-26"
+last_action: "Renamed to proposal-agent, created GitHub repo"
+github_url: "https://github.com/phil-rev/proposal-agent"
+local_path: "/Users/work/proposal-agent"
 tags: ["agent", "automation", "proposal-generation", "gamma-api"]
