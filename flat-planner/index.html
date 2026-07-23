@@ -143,6 +143,7 @@
   <div class="hint">Click a page to change its template and add content per zone. Drag a page onto another to move/swap. Use ⋮ for insert / delete / lock, and <b>Setup</b> for categories, ad pool, sections, display &amp; PDF.</div>
 </div>
 <div class="overlay" id="overlay"><div class="modal" id="modal"></div></div>
+<div class="overlay" id="overlay2" style="z-index:80"><div class="modal sm" id="modal2"></div></div>
 <div class="menu" id="ctxmenu"></div>
 
 <script>
@@ -442,7 +443,7 @@
       {t:"Copy content across next…",f:()=>copyAcross(pidv)},
       {t:p.locked?"Unlock":"Lock",f:()=>{p.locked=!p.locked;save();render();}},
       {sep:1},
-      {t:"Delete page",danger:1,f:()=>{if(isSpecial(p.kind)){alert("Cover / IFC / IBC / Back can't be deleted.");return;}iss.pages=iss.pages.filter(z=>z.id!==pidv);renumber(iss);save();render();}}
+      {t:"Delete page",danger:1,f:async()=>{if(isSpecial(p.kind)){await infoModal("Can't delete","Cover / IFC / IBC / Back can't be deleted.");return;}iss.pages=iss.pages.filter(z=>z.id!==pidv);renumber(iss);save();render();}}
     ];
     ctxmenu.innerHTML=items.map((it,i)=>it.sep?'<div class="sep"></div>':'<div class="mi'+(it.danger?" danger":"")+'" data-i="'+i+'">'+it.t+'</div>').join("");
     ctxmenu.style.left=Math.min(x,window.innerWidth-210)+"px";ctxmenu.style.top=y+"px";ctxmenu.classList.add("show");
@@ -450,9 +451,9 @@
   }
   function renumber(iss){let n=1;iss.pages.forEach(p=>{if(p.kind==="page")p.label=String(n++);});}
   function addBlank(){return {id:uid("p"),label:"?",kind:"page",locked:false,notes:"",templateId:"full",zones:makeZones("full")};}
-  function insertPages(afterId){const iss=activeIssue();const idx=iss.pages.findIndex(p=>p.id===afterId);const n=parseInt(prompt("How many pages?","1"),10);if(!n||n<1)return;const add=[];for(let i=0;i<n;i++)add.push(addBlank());iss.pages.splice(idx+1,0,...add);renumber(iss);save();render();}
-  function copyAcross(srcId){const iss=activeIssue();const idx=iss.pages.findIndex(p=>p.id===srcId);const src=iss.pages[idx];const n=parseInt(prompt("Copy this page's content across how many following pages?","1"),10);if(!n||n<1)return;for(let i=1;i<=n;i++){const t=iss.pages[idx+i];if(!t||t.locked)break;t.templateId=src.templateId;t.zones=makeZones(src.templateId,src.zones);}save();render();}
-  document.getElementById("addPagesBtn").onclick=()=>{const iss=activeIssue();const n=parseInt(prompt("How many pages to add (before the inside back cover)?","2"),10);if(!n||n<1)return;const ibcIdx=iss.pages.findIndex(p=>p.kind==="ibc");const at=ibcIdx>=0?ibcIdx:iss.pages.length;const add=[];for(let i=0;i<n;i++)add.push(addBlank());iss.pages.splice(at,0,...add);renumber(iss);save();render();};
+  async function insertPages(afterId){const iss=activeIssue();const idx=iss.pages.findIndex(p=>p.id===afterId);const n=await askNumber("How many pages?",1);if(!n||n<1)return;const add=[];for(let i=0;i<n;i++)add.push(addBlank());iss.pages.splice(idx+1,0,...add);renumber(iss);save();render();}
+  async function copyAcross(srcId){const iss=activeIssue();const idx=iss.pages.findIndex(p=>p.id===srcId);const src=iss.pages[idx];const n=await askNumber("Copy this page's content across how many following pages?",1);if(!n||n<1)return;for(let i=1;i<=n;i++){const t=iss.pages[idx+i];if(!t||t.locked)break;t.templateId=src.templateId;t.zones=makeZones(src.templateId,src.zones);}save();render();}
+  document.getElementById("addPagesBtn").onclick=async()=>{const iss=activeIssue();const n=await askNumber("How many pages to add (before the inside back cover)?",2);if(!n||n<1)return;const ibcIdx=iss.pages.findIndex(p=>p.kind==="ibc");const at=ibcIdx>=0?ibcIdx:iss.pages.length;const add=[];for(let i=0;i<n;i++)add.push(addBlank());iss.pages.splice(at,0,...add);renumber(iss);save();render();};
 
   /* ---------- New flatplan ---------- */
   document.getElementById("newIssueBtn").onclick=openNew;
@@ -487,7 +488,7 @@
       return '<tr><td>'+esc(i.title)+(i.archived?' <span class="badge-arch">Archived</span>':'')+'</td><td style="color:#555;white-space:nowrap;">'+i.pages.length+' pp · '+ads+' ads</td><td style="text-align:right;white-space:nowrap;"><button class="btn sm ghost" data-open="'+i.id+'">Open</button> <button class="btn sm ghost" data-arch="'+i.id+'">'+(i.archived?"Unarchive":"Archive")+'</button></td></tr>';}).join("");
     modal.innerHTML='<div class="modal-b"><div class="modal-title">Issues</div><div class="zone-meta">All flatplans, including archived. Archived issues stay retrievable for history.</div><table class="grid"><tbody>'+rows+'</tbody></table><div class="modal-foot"><button class="btn ghost" id="resetDemo">Reset demo data</button><span class="spacer"></span><button class="btn ghost" data-close>Close</button></div></div>';
     modal.querySelectorAll("[data-close]").forEach(b=>b.onclick=closeModal);
-    document.getElementById("resetDemo").onclick=()=>{if(confirm("Reset all issues back to the original demo data?")){state=seed();save();closeModal();render();}};
+    document.getElementById("resetDemo").onclick=async()=>{if(await confirmModal("Reset demo data","Reset all issues back to the original demo data?")){state=seed();save();closeModal();render();}};
     modal.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>{state.activeIssueId=b.dataset.open;save();closeModal();render();});
     modal.querySelectorAll("[data-arch]").forEach(b=>b.onclick=()=>{const i=state.issues[b.dataset.arch];i.archived=!i.archived;if(i.archived&&i.id===state.activeIssueId){const o=Object.values(state.issues).find(x=>!x.archived);if(o)state.activeIssueId=o.id;}save();openManage();render();});
     showModal();
@@ -565,7 +566,37 @@
   function showModal(){overlay.classList.add("show");}
   function closeModal(){overlay.classList.remove("show");modal.innerHTML="";}
   overlay.addEventListener("click",e=>{if(e.target===overlay)closeModal();});
-  document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeModal();ctxmenu.classList.remove("show");}});
+
+  /* ---------- in-page dialogs (native prompt/confirm/alert are blocked in cross-origin iframes) ---------- */
+  const overlay2=document.getElementById("overlay2");const modal2=document.getElementById("modal2");
+  function closeDlg(){overlay2.classList.remove("show");modal2.innerHTML="";}
+  function askNumber(question,def){return new Promise(res=>{
+    modal2.className="modal sm";
+    modal2.innerHTML='<div class="modal-b"><div class="modal-title">'+esc(question)+'</div><input type="number" id="dlgNum" min="1" step="1" value="'+def+'"><div class="modal-foot"><button class="btn ghost" id="dlgCancel">Cancel</button><button class="btn primary" id="dlgOk">OK</button></div></div>';
+    overlay2.classList.add("show");
+    const inp=modal2.querySelector("#dlgNum");inp.focus();inp.select();
+    const done=v=>{closeDlg();res(v);};
+    modal2.querySelector("#dlgOk").onclick=()=>{const n=parseInt(inp.value,10);done(isNaN(n)?null:n);};
+    modal2.querySelector("#dlgCancel").onclick=()=>done(null);
+    inp.onkeydown=e=>{if(e.key==="Enter"){const n=parseInt(inp.value,10);done(isNaN(n)?null:n);}};
+  });}
+  function confirmModal(title,msg){return new Promise(res=>{
+    modal2.className="modal sm";
+    modal2.innerHTML='<div class="modal-b"><div class="modal-title">'+esc(title)+'</div><div style="font-size:13px;color:#444;">'+esc(msg)+'</div><div class="modal-foot"><button class="btn ghost" id="dlgCancel">Cancel</button><button class="btn primary" id="dlgOk">OK</button></div></div>';
+    overlay2.classList.add("show");
+    const done=v=>{closeDlg();res(v);};
+    modal2.querySelector("#dlgOk").onclick=()=>done(true);
+    modal2.querySelector("#dlgCancel").onclick=()=>done(false);
+  });}
+  function infoModal(title,msg){return new Promise(res=>{
+    modal2.className="modal sm";
+    modal2.innerHTML='<div class="modal-b"><div class="modal-title">'+esc(title)+'</div><div style="font-size:13px;color:#444;">'+esc(msg)+'</div><div class="modal-foot"><button class="btn primary" id="dlgOk">OK</button></div></div>';
+    overlay2.classList.add("show");
+    modal2.querySelector("#dlgOk").onclick=()=>{closeDlg();res();};
+  });}
+  overlay2.addEventListener("click",e=>{if(e.target===overlay2)closeDlg();});
+
+  document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeDlg();closeModal();ctxmenu.classList.remove("show");}});
   document.addEventListener("click",e=>{if(!ctxmenu.contains(e.target)&&e.target.id!=="setupBtn")ctxmenu.classList.remove("show");});
 
   try{load();}catch(e){state=seed();}
