@@ -7,10 +7,8 @@
 <style>
   :root{
     --ink:#1a1a1a; --muted:#6a6a6a; --line:#c7c7c7; --line2:#e4e4e4;
-    --teal:#1f8f95; --teal-bright:#49c5cb;
-    --special:#e8998a;            /* salmon - cover positions */
-    --zone-line:#b9b9b9;
-    --cat-progress:#e8a43c; --cat-approved:#3f86c6; --cat-final:#3ba36b;
+    --teal:#1f8f95; --special:#e8998a; --zone-line:#b9b9b9;
+    --tw:88px; --th:118px;   /* tile size (display setting) */
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;background:#fff;color:var(--ink);
@@ -18,10 +16,8 @@
   button{font-family:inherit;}
   .app{display:flex;flex-direction:column;min-height:100vh;}
 
-  /* top bar */
   .topbar{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--line2);flex-wrap:wrap;}
   .brand{font-weight:800;color:var(--teal);font-size:18px;letter-spacing:-.02em;}
-  .issue-select{display:flex;align-items:center;gap:6px;}
   .issue-select select{font-size:14px;font-weight:600;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:#fff;max-width:320px;}
   .badge-arch{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#9a6a00;background:#fff3d6;border:1px solid #f0d488;border-radius:4px;padding:2px 6px;}
   .spacer{flex:1;}
@@ -30,22 +26,19 @@
   .tbtn.primary{background:var(--teal);color:#fff;border-color:var(--teal);}
   .tbtn.primary:hover{background:#187478;}
 
-  /* toolbar / stats */
   .toolbar{display:flex;align-items:center;gap:14px;padding:9px 16px;border-bottom:1px solid var(--line2);flex-wrap:wrap;}
   h1.title{font-size:16px;font-weight:700;margin:0;color:#000;}
   .cats{display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:12px;color:#333;}
   .cats .c{display:flex;align-items:center;gap:5px;}
   .cats .dotc{width:11px;height:11px;border-radius:2px;display:inline-block;border:1px solid rgba(0,0,0,.15);}
-  .stat{font-size:12.5px;color:#333;}
-  .stat b{color:#000;}
+  .stat{font-size:12.5px;color:#333;} .stat b{color:#000;}
 
-  /* board */
   .board-wrap{padding:16px;overflow:auto;flex:1;}
   .board{display:flex;flex-wrap:wrap;align-items:flex-start;gap:16px 12px;}
   .spread{display:flex;gap:0;}
-  .page{display:flex;flex-direction:column;width:88px;}
+  .page{display:flex;flex-direction:column;width:var(--tw);}
 
-  .tile{position:relative;width:88px;height:118px;border:1.5px solid var(--line);background:#fff;cursor:pointer;overflow:hidden;transition:box-shadow .1s,transform .1s;}
+  .tile{position:relative;width:var(--tw);height:var(--th);border:1.5px solid var(--line);background:#fff;cursor:pointer;overflow:hidden;transition:box-shadow .1s,transform .1s;}
   .tile:hover{box-shadow:0 3px 12px rgba(0,0,0,.18);transform:translateY(-1px);z-index:3;}
   .tile.special{border:2px solid var(--special);}
   .tile.locked{cursor:not-allowed;}
@@ -54,20 +47,24 @@
   .zone{position:absolute;border:.5px solid var(--zone-line);display:flex;align-items:center;justify-content:center;text-align:center;padding:2px;overflow:hidden;}
   .zone .zt{font-size:7.5px;line-height:1.1;font-weight:600;color:#222;word-break:break-word;max-height:100%;overflow:hidden;}
   .zone.advert{background:repeating-linear-gradient(45deg,#eee,#eee 3px,#d7d7d7 3px,#d7d7d7 6px);}
+  .zone.advert .zt{color:#444;background:rgba(255,255,255,.72);padding:0 2px;border-radius:2px;}
   .zone.catbar{border-left-width:3px;}
-  .lockicon{position:absolute;top:2px;right:3px;font-size:9px;color:#888;z-index:2;}
+  .lockicon,.noteicon{position:absolute;font-size:9px;z-index:2;}
+  .lockicon{top:2px;right:3px;color:#888;} .noteicon{bottom:2px;right:3px;color:var(--teal);}
+  .overlay-badge{position:absolute;bottom:2px;left:3px;font-size:8px;font-weight:700;color:#fff;background:rgba(31,143,149,.9);border-radius:3px;padding:0 3px;z-index:2;}
   .caption{display:flex;justify-content:center;font-size:11px;color:#222;padding:3px 1px 0;min-height:15px;font-weight:600;}
   .pagemenu{position:absolute;top:1px;right:2px;font-size:12px;color:#999;cursor:pointer;line-height:1;padding:1px 3px;z-index:2;border-radius:3px;}
   .pagemenu:hover{background:#eee;color:#333;}
 
-  /* generic overlay + panels */
   .overlay{position:fixed;inset:0;background:rgba(20,20,20,.42);display:none;align-items:center;justify-content:center;z-index:60;padding:16px;}
   .overlay.show{display:flex;}
-  .modal{background:#fff;border-radius:10px;box-shadow:0 18px 48px rgba(0,0,0,.32);width:520px;max-width:100%;max-height:90vh;overflow:auto;}
-  .modal.sm{width:320px;}
+  .modal{background:#fff;border-radius:10px;box-shadow:0 18px 48px rgba(0,0,0,.32);width:560px;max-width:100%;max-height:90vh;overflow:auto;}
+  .modal.sm{width:340px;}
   .modal-b{padding:16px 18px 18px;}
+  .modal-title{font-size:17px;font-weight:700;margin-bottom:8px;}
   label.f{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:14px 0 5px;}
-  input[type=text],select,textarea{width:100%;padding:9px;border:1px solid var(--line);border-radius:6px;font-size:14px;font-family:inherit;background:#fff;}
+  input[type=text],input[type=number],select,textarea{width:100%;padding:9px;border:1px solid var(--line);border-radius:6px;font-size:14px;font-family:inherit;background:#fff;}
+  input[type=color]{width:38px;height:32px;padding:0;border:1px solid var(--line);border-radius:6px;background:#fff;cursor:pointer;vertical-align:middle;}
   textarea{min-height:70px;resize:vertical;}
   .radios{display:flex;flex-direction:column;gap:7px;font-size:14px;}
   .radios.row{flex-direction:row;gap:16px;}
@@ -77,9 +74,14 @@
   .btn{padding:9px 14px;border-radius:6px;border:none;font-size:13px;font-weight:600;cursor:pointer;}
   .btn.primary{background:var(--teal);color:#fff;} .btn.primary:hover{background:#187478;}
   .btn.ghost{background:none;color:var(--muted);} .btn.ghost:hover{color:#000;}
+  .btn.sm{padding:6px 9px;font-size:12px;}
+  table.grid{width:100%;border-collapse:collapse;font-size:13px;}
+  table.grid td,table.grid th{padding:7px 6px;border-bottom:1px solid var(--line2);text-align:left;vertical-align:middle;}
+  table.grid th{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);}
+  .info{background:#eefafa;border:1px solid #c7ebeb;border-radius:6px;padding:9px 11px;font-size:12.5px;color:#256;margin-bottom:12px;}
+  .sum-ok{color:#2c8a52;font-weight:700;} .sum-bad{color:#c0442c;font-weight:700;}
 
-  /* edit page dialog */
-  .tabs{display:flex;gap:0;border-bottom:1px solid var(--line2);margin:6px 0 14px;}
+  .tabs{display:flex;border-bottom:1px solid var(--line2);margin:6px 0 14px;}
   .tab{padding:8px 12px;font-size:12px;font-weight:700;letter-spacing:.03em;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;text-transform:uppercase;}
   .tab.active{color:var(--ink);border-bottom-color:var(--teal);}
   .tab.disabled{opacity:.4;cursor:default;}
@@ -94,114 +96,125 @@
   .zone-meta{font-size:12px;color:var(--muted);margin-bottom:8px;}
   .move-link{float:right;font-size:12px;font-weight:700;color:var(--teal);cursor:pointer;letter-spacing:.03em;}
 
-  /* template picker */
-  .tpl-lib{display:flex;flex-direction:column;gap:14px;}
+  .tpl-lib{display:flex;flex-direction:column;gap:12px;}
   .tpl-row h4{margin:0 0 7px;font-size:12px;font-weight:700;color:#333;}
-  .tpl-thumbs{display:flex;flex-wrap:wrap;gap:10px;}
-  .tpl-thumb{position:relative;width:64px;height:86px;border:1.5px solid var(--line);cursor:pointer;background:#fff;}
+  .tpl-thumbs{display:flex;flex-wrap:wrap;gap:9px;align-items:flex-start;}
+  .tpl-thumb{position:relative;width:56px;height:76px;border:1.5px solid var(--line);cursor:pointer;background:#fff;}
   .tpl-thumb:hover{border-color:var(--teal);box-shadow:0 2px 8px rgba(0,0,0,.15);}
   .tpl-thumb.cur{border-color:var(--teal);box-shadow:0 0 0 2px rgba(31,143,149,.3);}
-  .tpl-name{font-size:9px;text-align:center;color:#666;margin-top:2px;width:64px;}
+  .more-link{font-size:11px;font-weight:700;color:var(--teal);cursor:pointer;align-self:center;padding:0 4px;}
 
   .hint{font-size:12px;color:var(--muted);padding:10px 16px 24px;}
-  .menu{position:fixed;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.2);z-index:70;min-width:190px;padding:5px 0;font-size:13px;display:none;}
+  .menu{position:fixed;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.2);z-index:70;min-width:200px;padding:5px 0;font-size:13px;display:none;}
   .menu.show{display:block;}
   .menu .mi{padding:8px 14px;cursor:pointer;white-space:nowrap;}
   .menu .mi:hover{background:#f0f7f7;}
   .menu .mi.danger{color:#c0442c;}
   .menu .sep{height:1px;background:var(--line2);margin:4px 0;}
+  .menu .lbl{padding:5px 14px 2px;font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);}
+
+  @media print{
+    .topbar,.toolbar .cats,.toolbar .spacer,.hint,.overlay,.menu,.pagemenu{display:none !important;}
+    .toolbar{border:0;} .board-wrap{overflow:visible;}
+    .tile{box-shadow:none !important;transform:none !important;}
+    @page{margin:12mm;}
+  }
 </style>
 </head>
 <body>
 <div class="app">
   <div class="topbar">
     <span class="brand">flatplan</span>
-    <div class="issue-select">
-      <select id="issueSelect" title="Switch issue"></select>
-      <span class="badge-arch" id="archBadge" style="display:none">Archived</span>
-    </div>
+    <span class="issue-select"><select id="issueSelect" title="Switch issue"></select></span>
+    <span class="badge-arch" id="archBadge" style="display:none">Archived</span>
     <span class="spacer"></span>
     <button class="tbtn" id="addPagesBtn">+ Pages</button>
+    <button class="tbtn" id="setupBtn">Setup ▾</button>
     <button class="tbtn" id="manageBtn">Manage issues</button>
     <button class="tbtn primary" id="newIssueBtn">New flatplan</button>
   </div>
-
   <div class="toolbar">
     <h1 class="title" id="issueTitle">—</h1>
     <span class="spacer"></span>
     <div class="cats" id="catStats"></div>
     <div class="stat" id="pageStat"></div>
   </div>
-
   <div class="board-wrap"><div class="board" id="board"></div></div>
-  <div class="hint">Click a page to change its template and add content per zone. Drag a page onto another to move/swap. Use the page ⋮ menu for insert / delete / lock.</div>
+  <div class="hint">Click a page to change its template and add content per zone. Drag a page onto another to move/swap. Use ⋮ for insert / delete / lock, and <b>Setup</b> for categories, ad pool, sections, display &amp; PDF.</div>
 </div>
-
 <div class="overlay" id="overlay"><div class="modal" id="modal"></div></div>
 <div class="menu" id="ctxmenu"></div>
 
 <script>
 (function(){
   "use strict";
-  const KEY="flatplan_v3";
-
-  /* ---------- iframe-safe storage ---------- */
+  const KEY="flatplan_v4";
   const lsGet=k=>{try{return window.localStorage.getItem(k)}catch(e){return null}};
   const lsSet=(k,v)=>{try{window.localStorage.setItem(k,v)}catch(e){}};
   let seq=0; const uid=p=>(p||"id")+"_"+(seq++)+"_"+Math.floor(Math.random()*1e6);
 
-  /* ---------- curated template library ---------- */
-  // zones use fractional geometry {x,y,w,h} in 0..1; label mirrors Blinkplan's naming
+  /* ---------- template library (grouped, with common/more) ---------- */
   const Z=(x,y,w,h,label)=>({x,y,w,h,label});
   const TEMPLATES=[
-    {id:"full",  name:"Full page", group:"1 column", zones:[Z(0,0,1,1,"full")]},
-    {id:"half-v",name:"1/2 + 1/2 vertical", group:"2 column", zones:[Z(0,0,.5,1,"1/2 vertical"),Z(.5,0,.5,1,"1/2 vertical")]},
-    {id:"half-h",name:"1/2 + 1/2 horizontal", group:"2 row", zones:[Z(0,0,1,.5,"1/2 horizontal"),Z(0,.5,1,.5,"1/2 horizontal")]},
-    {id:"tt-third",name:"2/3 + 1/3", group:"2 column", zones:[Z(0,0,.667,1,"2/3 vertical"),Z(.667,0,.333,1,"1/3 vertical")]},
-    {id:"third-tt",name:"1/3 + 2/3", group:"2 column", zones:[Z(0,0,.333,1,"1/3 vertical"),Z(.333,0,.667,1,"2/3 vertical")]},
-    {id:"tt-sixths",name:"2/3 + 1/6 + 1/6", group:"3 zone", zones:[Z(0,0,.667,1,"2/3 vertical"),Z(.667,0,.333,.5,"1/6"),Z(.667,.5,.333,.5,"1/6")]},
-    {id:"thirds-v",name:"1/3 x 3", group:"3 column", zones:[Z(0,0,.333,1,"1/3 vertical"),Z(.333,0,.334,1,"1/3 vertical"),Z(.667,0,.333,1,"1/3 vertical")]},
-    {id:"half-quarters",name:"1/2 + 1/4 + 1/4", group:"3 zone", zones:[Z(0,0,.5,1,"1/2 vertical"),Z(.5,0,.5,.5,"1/4 square"),Z(.5,.5,.5,.5,"1/4 square")]},
-    {id:"quarters",name:"1/4 x 4", group:"4 zone", zones:[Z(0,0,.5,.5,"1/4 square"),Z(.5,0,.5,.5,"1/4 square"),Z(0,.5,.5,.5,"1/4 square"),Z(.5,.5,.5,.5,"1/4 square")]}
+    {id:"full",name:"Full page",group:"1 column",common:1,zones:[Z(0,0,1,1,"full")]},
+    // vertical splits
+    {id:"half-v",name:"1/2 + 1/2",group:"2 column",common:1,zones:[Z(0,0,.5,1,"1/2 vertical"),Z(.5,0,.5,1,"1/2 vertical")]},
+    {id:"tt-third",name:"2/3 + 1/3",group:"2 column",common:1,zones:[Z(0,0,.667,1,"2/3 vertical"),Z(.667,0,.333,1,"1/3 vertical")]},
+    {id:"third-tt",name:"1/3 + 2/3",group:"2 column",common:1,zones:[Z(0,0,.333,1,"1/3 vertical"),Z(.333,0,.667,1,"2/3 vertical")]},
+    {id:"quarter-3q",name:"1/4 + 3/4",group:"2 column",zones:[Z(0,0,.25,1,"1/4 vertical"),Z(.25,0,.75,1,"3/4 vertical")]},
+    {id:"3q-quarter",name:"3/4 + 1/4",group:"2 column",zones:[Z(0,0,.75,1,"3/4 vertical"),Z(.75,0,.25,1,"1/4 vertical")]},
+    // horizontal splits
+    {id:"half-h",name:"1/2 / 1/2",group:"2 row",common:1,zones:[Z(0,0,1,.5,"1/2 horizontal"),Z(0,.5,1,.5,"1/2 horizontal")]},
+    {id:"tt-third-h",name:"2/3 / 1/3",group:"2 row",common:1,zones:[Z(0,0,1,.667,"2/3 horizontal"),Z(0,.667,1,.333,"1/3 horizontal")]},
+    {id:"third-tt-h",name:"1/3 / 2/3",group:"2 row",zones:[Z(0,0,1,.333,"1/3 horizontal"),Z(0,.333,1,.667,"2/3 horizontal")]},
+    {id:"thirds-h",name:"1/3 x3 rows",group:"2 row",zones:[Z(0,0,1,.333,"1/3 horizontal"),Z(0,.333,1,.334,"1/3 horizontal"),Z(0,.667,1,.333,"1/3 horizontal")]},
+    // 3 zone
+    {id:"thirds-v",name:"1/3 x3",group:"3 zone",common:1,zones:[Z(0,0,.333,1,"1/3 vertical"),Z(.333,0,.334,1,"1/3 vertical"),Z(.667,0,.333,1,"1/3 vertical")]},
+    {id:"tt-sixths",name:"2/3 + 1/6 + 1/6",group:"3 zone",common:1,zones:[Z(0,0,.667,1,"2/3 vertical"),Z(.667,0,.333,.5,"1/6"),Z(.667,.5,.333,.5,"1/6")]},
+    {id:"half-quarters",name:"1/2 + 1/4 + 1/4",group:"3 zone",common:1,zones:[Z(0,0,.5,1,"1/2 vertical"),Z(.5,0,.5,.5,"1/4 square"),Z(.5,.5,.5,.5,"1/4 square")]},
+    {id:"quarters-half",name:"1/4 + 1/4 + 1/2",group:"3 zone",zones:[Z(0,0,.5,.5,"1/4 square"),Z(0,.5,.5,.5,"1/4 square"),Z(.5,0,.5,1,"1/2 vertical")]},
+    {id:"half-h-halves",name:"1/2 / 1/4 + 1/4",group:"3 zone",zones:[Z(0,0,1,.5,"1/2 horizontal"),Z(0,.5,.5,.5,"1/4 square"),Z(.5,.5,.5,.5,"1/4 square")]},
+    // 4 zone
+    {id:"quarters",name:"1/4 x4",group:"4 zone",common:1,zones:[Z(0,0,.5,.5,"1/4 square"),Z(.5,0,.5,.5,"1/4 square"),Z(0,.5,.5,.5,"1/4 square"),Z(.5,.5,.5,.5,"1/4 square")]},
+    {id:"quarters-v",name:"1/4 x4 cols",group:"4 zone",zones:[Z(0,0,.25,1,"1/4 vertical"),Z(.25,0,.25,1,"1/4 vertical"),Z(.5,0,.25,1,"1/4 vertical"),Z(.75,0,.25,1,"1/4 vertical")]},
+    {id:"quarters-h",name:"1/4 x4 rows",group:"4 zone",zones:[Z(0,0,1,.25,"1/4 horizontal"),Z(0,.25,1,.25,"1/4 horizontal"),Z(0,.5,1,.25,"1/4 horizontal"),Z(0,.75,1,.25,"1/4 horizontal")]},
+    // 6 zone
+    {id:"sixths",name:"1/6 x6",group:"6 zone",zones:[Z(0,0,.333,.5,"1/6"),Z(.333,0,.334,.5,"1/6"),Z(.667,0,.333,.5,"1/6"),Z(0,.5,.333,.5,"1/6"),Z(.333,.5,.334,.5,"1/6"),Z(.667,.5,.333,.5,"1/6")]}
   ];
   const tplById=id=>TEMPLATES.find(t=>t.id===id)||TEMPLATES[0];
 
-  const CATEGORIES=[
-    {id:"progress",name:"In progress",color:"var(--cat-progress)"},
-    {id:"approved",name:"Approved",color:"var(--cat-approved)"},
-    {id:"final",name:"Final",color:"var(--cat-final)"}
-  ];
-  const catById=id=>CATEGORIES.find(c=>c.id===id);
-
-  /* ---------- zones for a page from a template ---------- */
-  function makeZones(tplId, carry){
-    const t=tplById(tplId);
-    return t.zones.map((z,i)=>({
-      id:uid("z"), label:z.label,
+  /* ---------- zones from template ---------- */
+  function makeZones(tplId,carry){
+    return tplById(tplId).zones.map((z,i)=>({
+      id:uid("z"),label:z.label,
       content:(carry&&carry[i]?carry[i].content:"")||"",
       advert:(carry&&carry[i]?!!carry[i].advert:false),
-      category:(carry&&carry[i]?carry[i].category:"")||""
+      category:(carry&&carry[i]?carry[i].category:"")||"",
+      placed:(carry&&carry[i]?carry[i].placed:"")||""
     }));
   }
-
-  /* ---------- page list: Cover, IFC, 1..N, IBC, Back ---------- */
-  function makePages(n, tplId){
+  function makePages(n,tplId){
     tplId=tplId||"full";
     const mk=(label,kind)=>({id:uid("p"),label,kind,locked:false,notes:"",templateId:tplId,zones:makeZones(tplId)});
-    const pages=[mk("Cover","cover"), mk("IFC","ifc")];
-    for(let i=1;i<=n;i++) pages.push(mk(String(i),"page"));
-    pages.push(mk("IBC","ibc"), mk("Back","back"));
+    const pages=[mk("Cover","cover"),mk("IFC","ifc")];
+    for(let i=1;i<=n;i++)pages.push(mk(String(i),"page"));
+    pages.push(mk("IBC","ibc"),mk("Back","back"));
     return pages;
   }
   const isSpecial=k=>k==="cover"||k==="ifc"||k==="ibc"||k==="back";
 
   /* ---------- seed ---------- */
+  function defaultCats(){return [
+    {id:"progress",name:"In progress",color:"#e8a43c"},
+    {id:"approved",name:"Approved",color:"#3f86c6"},
+    {id:"final",name:"Final",color:"#3ba36b"}];}
   function seed(){
     const now=Date.now();
-    const cur={id:uid("iss"),title:"Dance Magazine — July/August 2026",orientation:"portrait",singlePages:false,archived:false,createdAt:now,pages:makePages(12)};
+    const cur={id:uid("iss"),title:"Dance Magazine — July/August 2026",orientation:"portrait",singlePages:false,archived:false,createdAt:now,pages:makePages(12),
+      sections:[{id:uid("s"),label:"Cover",pages:4},{id:uid("s"),label:"Section 1",pages:12}]};
     const byLabel=l=>cur.pages.find(p=>p.label===l);
     const setTpl=(p,tpl)=>{p.templateId=tpl;p.zones=makeZones(tpl);};
-    const fill=(label,tpl,zoneData)=>{const p=byLabel(label);if(!p)return;if(tpl)setTpl(p,tpl);zoneData.forEach((d,i)=>{if(p.zones[i])Object.assign(p.zones[i],d);});};
+    const fill=(label,tpl,zd)=>{const p=byLabel(label);if(!p)return;if(tpl)setTpl(p,tpl);zd.forEach((d,i)=>{if(p.zones[i])Object.assign(p.zones[i],d);});};
     fill("Cover",null,[{content:"Cover image",category:"final"}]);
     fill("IFC",null,[{content:"Allegro Dancewear",advert:true,category:"approved"}]);
     fill("1",null,[{content:"Table of Contents",category:"approved"}]);
@@ -219,19 +232,32 @@
     fill("IBC",null,[{content:"Nova Dance Co.",advert:true,category:"final"}]);
     fill("Back",null,[{content:"Legato Brands",advert:true,category:"final"}]);
 
-    const past={id:uid("iss"),title:"Dance Magazine — May/June 2026",orientation:"portrait",singlePages:false,archived:true,createdAt:now-6e9,pages:makePages(12)};
+    const past={id:uid("iss"),title:"Dance Magazine — May/June 2026",orientation:"portrait",singlePages:false,archived:true,createdAt:now-6e9,pages:makePages(12),sections:[]};
     past.pages.filter(p=>p.kind==="page").forEach((p,i)=>{
       if(i%3===0){p.zones[0].content="Advertiser "+(i+1);p.zones[0].advert=true;p.zones[0].category="final";}
-      else {p.zones[0].content="Editorial";p.zones[0].category="final";}
-    });
-    return {activeIssueId:cur.id, issues:{[cur.id]:cur,[past.id]:past}};
+      else{p.zones[0].content="Editorial";p.zones[0].category="final";}});
+
+    return {activeIssueId:cur.id,issues:{[cur.id]:cur,[past.id]:past},
+      categories:defaultCats(),
+      pool:[{id:uid("a"),text:"Prospective: Mirella",suggested:"middle",size:"Full Page",shape:"Portrait",placed:false},
+            {id:uid("a"),text:"Renewal: So Danca",suggested:"back third",size:"1/2",shape:"Landscape",placed:false}],
+      display:{thumbs:true,overlays:false,tileSize:"m"}};
   }
 
   /* ---------- state ---------- */
   let state;
-  function load(){const raw=lsGet(KEY);if(raw){try{const s=JSON.parse(raw);if(s&&s.issues&&s.activeIssueId){state=s;return;}}catch(e){}}state=seed();save();}
+  function normalize(s){
+    if(!s.categories)s.categories=defaultCats();
+    if(!s.pool)s.pool=[];
+    if(!s.display)s.display={thumbs:true,overlays:false,tileSize:"m"};
+    Object.values(s.issues).forEach(i=>{if(!i.sections)i.sections=[];i.pages.forEach(p=>p.zones.forEach(z=>{if(z.placed===undefined)z.placed="";}));});
+    return s;
+  }
+  function load(){const raw=lsGet(KEY);if(raw){try{const s=JSON.parse(raw);if(s&&s.issues&&s.activeIssueId){state=normalize(s);return;}}catch(e){}}state=seed();save();}
   function save(){lsSet(KEY,JSON.stringify(state));}
   const activeIssue=()=>state.issues[state.activeIssueId];
+  const cats=()=>state.categories;
+  const catById=id=>state.categories.find(c=>c.id===id);
   const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 
   const board=document.getElementById("board");
@@ -239,7 +265,7 @@
   const modal=document.getElementById("modal");
   const ctxmenu=document.getElementById("ctxmenu");
 
-  /* ---------- paint zones into a positioned host ---------- */
+  /* ---------- paint zones ---------- */
   function paintZones(host,page,opts){
     opts=opts||{};
     const t=tplById(page.templateId);
@@ -247,27 +273,24 @@
       const g=t.zones[i]||t.zones[0];
       const el=document.createElement("div");
       el.className="zone"+(zone.advert?" advert":"")+(zone.category?" catbar":"");
-      el.style.left=(g.x*100)+"%";el.style.top=(g.y*100)+"%";
-      el.style.width=(g.w*100)+"%";el.style.height=(g.h*100)+"%";
+      el.style.left=(g.x*100)+"%";el.style.top=(g.y*100)+"%";el.style.width=(g.w*100)+"%";el.style.height=(g.h*100)+"%";
       if(zone.category){const c=catById(zone.category);if(c)el.style.borderLeftColor=c.color;}
-      if(!zone.advert && zone.content){el.innerHTML='<span class="zt">'+esc(zone.content)+'</span>';}
-      if(opts.selectable){
-        el.dataset.zi=i;
-        if(opts.selectedIndex===i)el.classList.add("sel");
-        el.addEventListener("click",e=>{e.stopPropagation();opts.onSelect(i);});
-      }
+      const showText=opts.forceText||state.display.thumbs;
+      if(showText&&zone.content)el.innerHTML='<span class="zt">'+esc(zone.content)+'</span>';
+      if(opts.selectable){el.dataset.zi=i;if(opts.selectedIndex===i)el.classList.add("sel");el.addEventListener("click",e=>{e.stopPropagation();opts.onSelect(i);});}
       host.appendChild(el);
     });
   }
 
-  /* ---------- board render ---------- */
+  /* ---------- board ---------- */
   function pageTile(page){
     const el=document.createElement("div");
     el.className="tile"+(isSpecial(page.kind)?" special":"")+(page.locked?" locked":"");
-    el.dataset.pid=page.id;
-    el.draggable=!page.locked;
+    el.dataset.pid=page.id; el.draggable=!page.locked;
     paintZones(el,page,{});
     if(page.locked){const l=document.createElement("div");l.className="lockicon";l.textContent="🔒";el.appendChild(l);}
+    if(page.notes){const n=document.createElement("div");n.className="noteicon";n.textContent="📝";el.appendChild(n);}
+    if(state.display.overlays){const ads=page.zones.filter(z=>z.advert).length;if(ads){const bd=document.createElement("div");bd.className="overlay-badge";bd.textContent=ads+" ad"+(ads>1?"s":"");el.appendChild(bd);}}
     const menu=document.createElement("div");menu.className="pagemenu";menu.textContent="⋮";
     menu.addEventListener("click",e=>{e.stopPropagation();openPageMenu(page.id,e.clientX,e.clientY);});
     el.appendChild(menu);
@@ -283,33 +306,30 @@
     const w=document.createElement("div");w.className="page";
     w.appendChild(pageTile(page));
     const cap=document.createElement("div");cap.className="caption";cap.textContent=page.label;
-    w.appendChild(cap);
-    return w;
+    w.appendChild(cap);return w;
+  }
+  function applyTileSize(){
+    const sz={s:["64px","86px"],m:["88px","118px"],l:["112px","150px"]}[state.display.tileSize]||["88px","118px"];
+    document.documentElement.style.setProperty("--tw",sz[0]);document.documentElement.style.setProperty("--th",sz[1]);
   }
   function render(){
     const iss=activeIssue();
+    applyTileSize();
     const sel=document.getElementById("issueSelect");
     sel.innerHTML=Object.values(state.issues).sort((a,b)=>b.createdAt-a.createdAt)
       .map(i=>'<option value="'+i.id+'"'+(i.id===iss.id?" selected":"")+'>'+esc(i.title)+(i.archived?" (archived)":"")+'</option>').join("");
     document.getElementById("archBadge").style.display=iss.archived?"":"none";
     document.getElementById("issueTitle").textContent=iss.title;
-
     board.innerHTML="";
-    layoutUnits(iss).forEach(u=>{
-      const s=document.createElement("div");s.className="spread";
-      u.forEach(p=>s.appendChild(pageColumn(p)));
-      board.appendChild(s);
-    });
+    layoutUnits(iss).forEach(u=>{const s=document.createElement("div");s.className="spread";u.forEach(p=>s.appendChild(pageColumn(p)));board.appendChild(s);});
     renderStats(iss);
     save();
   }
-  // pairing: Cover alone, [IFC..IBC] paired 2-by-2, Back alone (single-pages = all standalone)
   function layoutUnits(iss){
-    if(iss.singlePages) return iss.pages.map(p=>[p]);
+    if(iss.singlePages)return iss.pages.map(p=>[p]);
     const units=[],mid=[];
     iss.pages.forEach(p=>{if(p.kind!=="cover"&&p.kind!=="back")mid.push(p);});
-    const cover=iss.pages.find(p=>p.kind==="cover");
-    const back=iss.pages.find(p=>p.kind==="back");
+    const cover=iss.pages.find(p=>p.kind==="cover"),back=iss.pages.find(p=>p.kind==="back");
     if(cover)units.push([cover]);
     for(let i=0;i<mid.length;i+=2)units.push(mid.slice(i,i+2));
     if(back)units.push([back]);
@@ -317,126 +337,104 @@
   }
   function renderStats(iss){
     const counts={};let advertPages=0;
-    iss.pages.forEach(p=>{
-      const cats=new Set();let hasAd=false;
-      p.zones.forEach(z=>{if(z.category)cats.add(z.category);if(z.advert)hasAd=true;});
-      cats.forEach(c=>counts[c]=(counts[c]||0)+1);
-      if(hasAd)advertPages++;
-    });
-    document.getElementById("catStats").innerHTML=CATEGORIES.map(c=>
-      '<span class="c"><span class="dotc" style="background:'+c.color+'"></span>'+c.name+' <b>'+(counts[c.id]||0)+'</b></span>'
-    ).join("");
+    iss.pages.forEach(p=>{const cs=new Set();let ad=false;p.zones.forEach(z=>{if(z.category)cs.add(z.category);if(z.advert)ad=true;});cs.forEach(c=>counts[c]=(counts[c]||0)+1);if(ad)advertPages++;});
+    document.getElementById("catStats").innerHTML=cats().map(c=>'<span class="c"><span class="dotc" style="background:'+c.color+'"></span>'+esc(c.name)+' <b>'+(counts[c.id]||0)+'</b></span>').join("");
     document.getElementById("pageStat").innerHTML='<b>'+iss.pages.length+'</b> pages · <b>'+advertPages+'</b> with ads';
   }
 
-  /* ---------- move / swap ---------- */
   function movePage(fromId,toId){
     if(!fromId||fromId===toId)return;
-    const iss=activeIssue();
-    const a=iss.pages.find(p=>p.id===fromId),b=iss.pages.find(p=>p.id===toId);
+    const iss=activeIssue();const a=iss.pages.find(p=>p.id===fromId),b=iss.pages.find(p=>p.id===toId);
     if(!a||!b||a.locked||b.locked)return;
-    const tt=a.templateId,tz=a.zones; a.templateId=b.templateId;a.zones=b.zones; b.templateId=tt;b.zones=tz;
-    render();
+    const tt=a.templateId,tz=a.zones;a.templateId=b.templateId;a.zones=b.zones;b.templateId=tt;b.zones=tz;render();
   }
 
-  /* ---------- Edit Page dialog ---------- */
-  let edit={pid:null,tab:"content",zi:0,tplOpen:false};
+  /* ---------- Edit Page ---------- */
+  let edit={pid:null,tab:"content",zi:0,tplOpen:false,expanded:{}};
   const curPage=()=>activeIssue().pages.find(x=>x.id===edit.pid);
-  function openEdit(pidv){edit={pid:pidv,tab:"content",zi:0,tplOpen:false};renderEdit();showModal();}
+  function openEdit(pidv){edit={pid:pidv,tab:"content",zi:0,tplOpen:false,expanded:{}};renderEdit();showModal();}
 
   function renderEdit(){
-    const p=curPage();if(!p)return;
-    modal.className="modal";
+    const p=curPage();if(!p)return;modal.className="modal";
     const tabs=["Content","Notes","Tags","Comments"];
     const title=isSpecial(p.kind)?p.label:"Page "+p.label;
-    let h='<div class="modal-b">';
-    h+='<div style="font-size:17px;font-weight:700;margin-bottom:2px;">Edit '+esc(title)+'<span class="move-link" id="moveLink">↔ Move</span></div>';
+    let h='<div class="modal-b"><div class="modal-title">Edit '+esc(title)+'<span class="move-link" id="moveLink">↔ Move</span></div>';
     h+='<div class="tabs">'+tabs.map(t=>{const key=t.toLowerCase();const dis=(key!=="content"&&key!=="notes");
       return '<div class="tab '+(edit.tab===key?"active":"")+(dis?" disabled":"")+'" data-tab="'+key+'">'+t+'</div>';}).join("")+'</div>';
-
     if(edit.tab==="notes"){
       h+='<label class="f">Page notes</label><textarea id="noteArea" placeholder="Production notes for this page…">'+esc(p.notes||"")+'</textarea>';
       h+='<div class="modal-foot"><button class="btn ghost" data-close>Close</button><button class="btn primary" id="saveNote">Save</button></div></div>';
-      modal.innerHTML=h;wireEditCommon(p);
-      document.getElementById("saveNote").onclick=()=>{p.notes=document.getElementById("noteArea").value;save();closeModal();};
-      return;
+      modal.innerHTML=h;wireEditCommon(p);document.getElementById("saveNote").onclick=()=>{p.notes=document.getElementById("noteArea").value;save();render();closeModal();};return;
     }
-
-    // CONTENT tab
     const zone=p.zones[edit.zi]||p.zones[0];
     h+='<div class="edit-grid"><div class="edit-left"><div class="prev" id="prev"></div>';
     h+='<div class="change-tpl" id="changeTpl">'+(edit.tplOpen?"▾ ":"")+'CHANGE TEMPLATE</div></div><div class="edit-right">';
-    if(edit.tplOpen){
-      h+=renderTplLib(p.templateId);
-    } else {
+    if(edit.tplOpen){h+=renderTplLib(p.templateId);}
+    else{
       h+='<div class="zone-meta">Zone '+(edit.zi+1)+' of '+p.zones.length+' · click a zone in the preview to edit it</div>';
       h+='<label class="chk"><input type="checkbox" id="advertChk" '+(zone.advert?"checked":"")+'> Advert (ad slot — placed separately)</label>';
-      h+='<label class="f">Content ('+esc(zone.label)+')</label>';
-      h+='<input type="text" id="contentInput" value="'+esc(zone.content)+'" placeholder="Headline / advertiser…" '+(zone.advert?"disabled":"")+'>';
+      if(zone.advert){
+        const unplaced=state.pool.filter(a=>!a.placed||a.id===zone.placed);
+        h+='<label class="f">Place ad from pool</label><select id="poolSel"><option value="">— pick a staged ad —</option>'+
+          unplaced.map(a=>'<option value="'+a.id+'"'+(zone.placed===a.id?" selected":"")+'>'+esc(a.text)+' ('+esc(a.size)+')</option>').join("")+'</select>';
+      } else {
+        h+='<label class="f">Content ('+esc(zone.label)+')</label><input type="text" id="contentInput" value="'+esc(zone.content)+'" placeholder="Headline / advertiser…">';
+      }
       h+='<label class="f">Category</label><select id="catSel"><option value="">&lt;none&gt;</option>'+
-        CATEGORIES.map(c=>'<option value="'+c.id+'"'+(zone.category===c.id?" selected":"")+'>'+c.name+'</option>').join("")+'</select>';
+        cats().map(c=>'<option value="'+c.id+'"'+(zone.category===c.id?" selected":"")+'>'+esc(c.name)+'</option>').join("")+'</select>';
     }
-    h+='</div></div>';
-    h+='<div class="modal-foot"><button class="btn ghost" data-close>Close</button><button class="btn primary" id="saveEdit">Save</button></div></div>';
+    h+='</div></div><div class="modal-foot"><button class="btn ghost" data-close>Close</button><button class="btn primary" id="saveEdit">Save</button></div></div>';
     modal.innerHTML=h;
-
-    const repaint=()=>{const pv=document.getElementById("prev");pv.innerHTML="";
-      paintZones(pv,p,{selectable:true,selectedIndex:edit.zi,onSelect:i=>{persistZoneInputs(p);edit.zi=i;edit.tplOpen=false;renderEdit();}});};
+    const repaint=()=>{const pv=document.getElementById("prev");pv.innerHTML="";paintZones(pv,p,{forceText:true,selectable:true,selectedIndex:edit.zi,onSelect:i=>{persistZoneInputs(p);edit.zi=i;edit.tplOpen=false;renderEdit();}});};
     repaint();
     document.getElementById("changeTpl").onclick=()=>{persistZoneInputs(p);edit.tplOpen=!edit.tplOpen;renderEdit();};
     if(edit.tplOpen){wireTplLib(p);}
     else{
       const ci=document.getElementById("contentInput");
-      ci.addEventListener("input",()=>{zone.content=ci.value;repaint();});
-      document.getElementById("advertChk").onchange=e=>{zone.advert=e.target.checked;if(zone.advert)zone.content="";renderEdit();};
+      if(ci)ci.addEventListener("input",()=>{zone.content=ci.value;repaint();});
+      document.getElementById("advertChk").onchange=e=>{zone.advert=e.target.checked;if(zone.advert){zone.content="";}else{if(zone.placed){const a=state.pool.find(x=>x.id===zone.placed);if(a)a.placed=false;}zone.placed="";}renderEdit();};
+      const ps=document.getElementById("poolSel");
+      if(ps)ps.onchange=e=>{if(zone.placed){const old=state.pool.find(x=>x.id===zone.placed);if(old)old.placed=false;}
+        const a=state.pool.find(x=>x.id===e.target.value);if(a){a.placed=true;zone.placed=a.id;zone.content=a.text;}else{zone.placed="";zone.content="";}repaint();};
       document.getElementById("catSel").onchange=e=>{zone.category=e.target.value;repaint();};
     }
     wireEditCommon(p);
     document.getElementById("saveEdit").onclick=()=>{persistZoneInputs(p);save();render();closeModal();};
   }
-  function persistZoneInputs(p){
-    const zone=p.zones[edit.zi];if(!zone)return;
-    const ci=document.getElementById("contentInput");const cs=document.getElementById("catSel");
-    if(ci&&!zone.advert)zone.content=ci.value;
-    if(cs)zone.category=cs.value;
-  }
+  function persistZoneInputs(p){const zone=p.zones[edit.zi];if(!zone)return;const ci=document.getElementById("contentInput");const cs=document.getElementById("catSel");if(ci&&!zone.advert)zone.content=ci.value;if(cs)zone.category=cs.value;}
   function wireEditCommon(p){
     modal.querySelectorAll(".tab:not(.disabled)").forEach(t=>t.onclick=()=>{persistZoneInputs(p);edit.tab=t.dataset.tab;edit.tplOpen=false;renderEdit();});
     const ml=document.getElementById("moveLink");if(ml)ml.onclick=()=>openMove(p);
     modal.querySelectorAll("[data-close]").forEach(b=>b.onclick=closeModal);
   }
-
   function renderTplLib(curId){
     const groups={};TEMPLATES.forEach(t=>{(groups[t.group]=groups[t.group]||[]).push(t);});
     let h='<div class="zone-meta">Pick a layout — replaces this page\'s zone structure</div><div class="tpl-lib">';
     Object.keys(groups).forEach(g=>{
+      const all=groups[g];const exp=edit.expanded[g];const shown=exp?all:all.filter((t,i)=>t.common||i<4);
       h+='<div class="tpl-row"><h4>'+esc(g)+'</h4><div class="tpl-thumbs">';
-      groups[g].forEach(t=>{h+='<div><div class="tpl-thumb'+(t.id===curId?" cur":"")+'" data-tpl="'+t.id+'" id="tt_'+t.id+'"></div><div class="tpl-name">'+esc(t.name)+'</div></div>';});
+      shown.forEach(t=>{h+='<div><div class="tpl-thumb'+(t.id===curId?" cur":"")+'" data-tpl="'+t.id+'" id="tt_'+t.id+'"></div></div>';});
+      if(!exp&&all.length>shown.length)h+='<span class="more-link" data-more="'+esc(g)+'">MORE…</span>';
       h+='</div></div>';
     });
     return h+'</div>';
   }
   function wireTplLib(p){
-    TEMPLATES.forEach(t=>{
-      const host=document.getElementById("tt_"+t.id);if(!host)return;
-      t.zones.forEach(g=>{const el=document.createElement("div");el.className="zone";
-        el.style.left=(g.x*100)+"%";el.style.top=(g.y*100)+"%";el.style.width=(g.w*100)+"%";el.style.height=(g.h*100)+"%";host.appendChild(el);});
-      host.onclick=()=>{p.zones=makeZones(t.id,p.zones);p.templateId=t.id;edit.zi=0;edit.tplOpen=false;renderEdit();};
-    });
+    TEMPLATES.forEach(t=>{const host=document.getElementById("tt_"+t.id);if(!host)return;
+      t.zones.forEach(g=>{const el=document.createElement("div");el.className="zone";el.style.left=(g.x*100)+"%";el.style.top=(g.y*100)+"%";el.style.width=(g.w*100)+"%";el.style.height=(g.h*100)+"%";host.appendChild(el);});
+      host.onclick=()=>{p.zones=makeZones(t.id,p.zones);p.templateId=t.id;edit.zi=0;edit.tplOpen=false;renderEdit();};});
+    modal.querySelectorAll("[data-more]").forEach(m=>m.onclick=()=>{edit.expanded[m.dataset.more]=true;renderEdit();});
   }
-
   function openMove(p){
     const iss=activeIssue();
     const opts=iss.pages.filter(x=>x.id!==p.id&&!x.locked).map(x=>'<option value="'+x.id+'">'+esc(x.label)+'</option>').join("");
     modal.className="modal sm";
-    modal.innerHTML='<div class="modal-b"><div style="font-size:16px;font-weight:700;margin-bottom:6px;">Move / swap '+esc(p.label)+'</div>'
-      +'<label class="f">Swap content with page</label><select id="swapSel">'+opts+'</select>'
-      +'<div class="modal-foot"><button class="btn ghost" data-close>Cancel</button><button class="btn primary" id="doSwap">Swap</button></div></div>';
+    modal.innerHTML='<div class="modal-b"><div class="modal-title">Move / swap '+esc(p.label)+'</div><label class="f">Swap content with page</label><select id="swapSel">'+opts+'</select><div class="modal-foot"><button class="btn ghost" data-close>Cancel</button><button class="btn primary" id="doSwap">Swap</button></div></div>';
     modal.querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>openEdit(p.id));
     document.getElementById("doSwap").onclick=()=>{movePage(p.id,document.getElementById("swapSel").value);closeModal();};
   }
 
-  /* ---------- page ⋮ menu ---------- */
+  /* ---------- page ⋮ ---------- */
   function openPageMenu(pidv,x,y){
     const iss=activeIssue();const p=iss.pages.find(z=>z.id===pidv);if(!p)return;
     const items=[
@@ -447,102 +445,129 @@
       {t:"Delete page",danger:1,f:()=>{if(isSpecial(p.kind)){alert("Cover / IFC / IBC / Back can't be deleted.");return;}iss.pages=iss.pages.filter(z=>z.id!==pidv);renumber(iss);save();render();}}
     ];
     ctxmenu.innerHTML=items.map((it,i)=>it.sep?'<div class="sep"></div>':'<div class="mi'+(it.danger?" danger":"")+'" data-i="'+i+'">'+it.t+'</div>').join("");
-    ctxmenu.style.left=Math.min(x,window.innerWidth-200)+"px";ctxmenu.style.top=y+"px";ctxmenu.classList.add("show");
+    ctxmenu.style.left=Math.min(x,window.innerWidth-210)+"px";ctxmenu.style.top=y+"px";ctxmenu.classList.add("show");
     ctxmenu.querySelectorAll(".mi").forEach(m=>m.onclick=()=>{ctxmenu.classList.remove("show");items[+m.dataset.i].f();});
   }
   function renumber(iss){let n=1;iss.pages.forEach(p=>{if(p.kind==="page")p.label=String(n++);});}
   function addBlank(){return {id:uid("p"),label:"?",kind:"page",locked:false,notes:"",templateId:"full",zones:makeZones("full")};}
-  function insertPages(afterId){
-    const iss=activeIssue();const idx=iss.pages.findIndex(p=>p.id===afterId);
-    const n=parseInt(prompt("How many pages?","1"),10);if(!n||n<1)return;
-    const add=[];for(let i=0;i<n;i++)add.push(addBlank());
-    iss.pages.splice(idx+1,0,...add);renumber(iss);save();render();
-  }
-  function copyAcross(srcId){
-    const iss=activeIssue();const idx=iss.pages.findIndex(p=>p.id===srcId);const src=iss.pages[idx];
-    const n=parseInt(prompt("Copy this page's content across how many following pages?","1"),10);if(!n||n<1)return;
-    for(let i=1;i<=n;i++){const t=iss.pages[idx+i];if(!t||t.locked)break;t.templateId=src.templateId;t.zones=makeZones(src.templateId,src.zones);}
-    save();render();
-  }
-
-  /* ---------- add pages (toolbar) ---------- */
-  document.getElementById("addPagesBtn").onclick=()=>{
-    const iss=activeIssue();
-    const n=parseInt(prompt("How many pages to add (before the inside back cover)?","2"),10);if(!n||n<1)return;
-    const ibcIdx=iss.pages.findIndex(p=>p.kind==="ibc");const at=ibcIdx>=0?ibcIdx:iss.pages.length;
-    const add=[];for(let i=0;i<n;i++)add.push(addBlank());
-    iss.pages.splice(at,0,...add);renumber(iss);save();render();
-  };
+  function insertPages(afterId){const iss=activeIssue();const idx=iss.pages.findIndex(p=>p.id===afterId);const n=parseInt(prompt("How many pages?","1"),10);if(!n||n<1)return;const add=[];for(let i=0;i<n;i++)add.push(addBlank());iss.pages.splice(idx+1,0,...add);renumber(iss);save();render();}
+  function copyAcross(srcId){const iss=activeIssue();const idx=iss.pages.findIndex(p=>p.id===srcId);const src=iss.pages[idx];const n=parseInt(prompt("Copy this page's content across how many following pages?","1"),10);if(!n||n<1)return;for(let i=1;i<=n;i++){const t=iss.pages[idx+i];if(!t||t.locked)break;t.templateId=src.templateId;t.zones=makeZones(src.templateId,src.zones);}save();render();}
+  document.getElementById("addPagesBtn").onclick=()=>{const iss=activeIssue();const n=parseInt(prompt("How many pages to add (before the inside back cover)?","2"),10);if(!n||n<1)return;const ibcIdx=iss.pages.findIndex(p=>p.kind==="ibc");const at=ibcIdx>=0?ibcIdx:iss.pages.length;const add=[];for(let i=0;i<n;i++)add.push(addBlank());iss.pages.splice(at,0,...add);renumber(iss);save();render();};
 
   /* ---------- New flatplan ---------- */
   document.getElementById("newIssueBtn").onclick=openNew;
   function openNew(){
-    modal.className="modal";
-    const cloneName=esc(activeIssue().title);
-    modal.innerHTML='<div class="modal-b"><div style="font-size:17px;font-weight:700;margin-bottom:10px;">Create new flatplan</div>'
+    modal.className="modal";const cloneName=esc(activeIssue().title);
+    modal.innerHTML='<div class="modal-b"><div class="modal-title">Create new flatplan</div>'
       +'<label class="f">Issue</label><input type="text" id="niTitle" placeholder="e.g. Dance Magazine — September 2026">'
       +'<label class="chk" style="margin-top:12px;"><input type="checkbox" id="niSingle"> Single pages (no spreads)</label>'
-      +'<label class="f">Orientation</label><div class="radios row"><label><input type="radio" name="ori" value="portrait" checked>Portrait</label>'
-        +'<label><input type="radio" name="ori" value="landscape">Landscape</label><label><input type="radio" name="ori" value="square">Square</label></div>'
-      +'<label class="f">Would you like to clone “'+cloneName+'”?</label>'
-      +'<div class="radios"><label><input type="radio" name="clone" value="empty" checked>No, just create an empty flatplan</label>'
-        +'<label><input type="radio" name="clone" value="layout">Yes, only the layout</label>'
-        +'<label><input type="radio" name="clone" value="all">Yes, the layout and all the content</label></div>'
+      +'<label class="f">Orientation</label><div class="radios row"><label><input type="radio" name="ori" value="portrait" checked>Portrait</label><label><input type="radio" name="ori" value="landscape">Landscape</label><label><input type="radio" name="ori" value="square">Square</label></div>'
+      +'<label class="f">Would you like to clone “'+cloneName+'”?</label><div class="radios"><label><input type="radio" name="clone" value="empty" checked>No, just create an empty flatplan</label><label><input type="radio" name="clone" value="layout">Yes, only the layout</label><label><input type="radio" name="clone" value="all">Yes, the layout and all the content</label></div>'
       +'<div id="emptyPagesWrap"><label class="f">Content pages (empty flatplan)</label><input type="text" id="niPages" value="12"></div>'
       +'<div class="modal-foot"><button class="btn ghost" data-close>Cancel</button><button class="btn primary" id="createIssue">Create</button></div></div>';
     modal.querySelectorAll("[data-close]").forEach(b=>b.onclick=closeModal);
     const toggleEmpty=()=>{const v=modal.querySelector('input[name=clone]:checked').value;document.getElementById("emptyPagesWrap").style.display=v==="empty"?"":"none";};
-    modal.querySelectorAll('input[name=clone]').forEach(r=>r.onchange=toggleEmpty);toggleEmpty();
-    showModal();
+    modal.querySelectorAll('input[name=clone]').forEach(r=>r.onchange=toggleEmpty);toggleEmpty();showModal();
     document.getElementById("createIssue").onclick=()=>{
       const title=document.getElementById("niTitle").value.trim()||"Untitled issue";
-      const single=document.getElementById("niSingle").checked;
-      const ori=modal.querySelector('input[name=ori]:checked').value;
-      const clone=modal.querySelector('input[name=clone]:checked').value;
-      const src=activeIssue();
-      let pages;
+      const single=document.getElementById("niSingle").checked;const ori=modal.querySelector('input[name=ori]:checked').value;const clone=modal.querySelector('input[name=clone]:checked').value;const src=activeIssue();let pages;
       if(clone==="empty"){pages=makePages(parseInt(document.getElementById("niPages").value,10)||0);}
       else if(clone==="layout"){pages=src.pages.map(p=>({id:uid("p"),label:p.label,kind:p.kind,locked:false,notes:"",templateId:p.templateId,zones:makeZones(p.templateId)}));}
       else{pages=src.pages.map(p=>({id:uid("p"),label:p.label,kind:p.kind,locked:false,notes:p.notes||"",templateId:p.templateId,zones:makeZones(p.templateId,p.zones)}));}
-      const iss={id:uid("iss"),title,orientation:ori,singlePages:single,archived:false,createdAt:Date.now(),pages};
+      const iss={id:uid("iss"),title,orientation:ori,singlePages:single,archived:false,createdAt:Date.now(),pages,sections:[]};
       state.issues[iss.id]=iss;state.activeIssueId=iss.id;save();closeModal();render();
     };
   }
 
-  /* ---------- Manage issues (history / archive) ---------- */
+  /* ---------- Manage issues ---------- */
   document.getElementById("manageBtn").onclick=openManage;
   function openManage(){
     modal.className="modal";
-    const rows=Object.values(state.issues).sort((a,b)=>b.createdAt-a.createdAt).map(i=>{
-      const ads=i.pages.filter(p=>p.zones.some(z=>z.advert)).length;
-      return '<tr style="border-bottom:1px solid var(--line2)"><td style="padding:8px 6px;">'+esc(i.title)+(i.archived?' <span class="badge-arch">Archived</span>':'')
-        +'</td><td style="padding:8px 6px;color:#555;white-space:nowrap;">'+i.pages.length+' pp · '+ads+' ads</td>'
-        +'<td style="padding:8px 6px;text-align:right;white-space:nowrap;">'
-        +'<button class="tbtn" data-open="'+i.id+'">Open</button> '
-        +'<button class="tbtn" data-arch="'+i.id+'">'+(i.archived?"Unarchive":"Archive")+'</button></td></tr>';
-    }).join("");
-    modal.innerHTML='<div class="modal-b"><div style="font-size:17px;font-weight:700;margin-bottom:4px;">Issues</div>'
-      +'<div class="zone-meta">All flatplans, including archived. Archived issues stay retrievable for history.</div>'
-      +'<table style="width:100%;border-collapse:collapse;font-size:13px;"><tbody>'+rows+'</tbody></table>'
-      +'<div class="modal-foot"><button class="btn ghost" id="resetDemo">Reset demo data</button><span class="spacer"></span><button class="btn ghost" data-close>Close</button></div></div>';
+    const rows=Object.values(state.issues).sort((a,b)=>b.createdAt-a.createdAt).map(i=>{const ads=i.pages.filter(p=>p.zones.some(z=>z.advert)).length;
+      return '<tr><td>'+esc(i.title)+(i.archived?' <span class="badge-arch">Archived</span>':'')+'</td><td style="color:#555;white-space:nowrap;">'+i.pages.length+' pp · '+ads+' ads</td><td style="text-align:right;white-space:nowrap;"><button class="btn sm ghost" data-open="'+i.id+'">Open</button> <button class="btn sm ghost" data-arch="'+i.id+'">'+(i.archived?"Unarchive":"Archive")+'</button></td></tr>';}).join("");
+    modal.innerHTML='<div class="modal-b"><div class="modal-title">Issues</div><div class="zone-meta">All flatplans, including archived. Archived issues stay retrievable for history.</div><table class="grid"><tbody>'+rows+'</tbody></table><div class="modal-foot"><button class="btn ghost" id="resetDemo">Reset demo data</button><span class="spacer"></span><button class="btn ghost" data-close>Close</button></div></div>';
     modal.querySelectorAll("[data-close]").forEach(b=>b.onclick=closeModal);
     document.getElementById("resetDemo").onclick=()=>{if(confirm("Reset all issues back to the original demo data?")){state=seed();save();closeModal();render();}};
     modal.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>{state.activeIssueId=b.dataset.open;save();closeModal();render();});
-    modal.querySelectorAll("[data-arch]").forEach(b=>b.onclick=()=>{const i=state.issues[b.dataset.arch];i.archived=!i.archived;
-      if(i.archived&&i.id===state.activeIssueId){const other=Object.values(state.issues).find(x=>!x.archived);if(other)state.activeIssueId=other.id;}
-      save();openManage();render();});
+    modal.querySelectorAll("[data-arch]").forEach(b=>b.onclick=()=>{const i=state.issues[b.dataset.arch];i.archived=!i.archived;if(i.archived&&i.id===state.activeIssueId){const o=Object.values(state.issues).find(x=>!x.archived);if(o)state.activeIssueId=o.id;}save();openManage();render();});
     showModal();
   }
 
-  /* ---------- misc wiring ---------- */
+  /* ---------- Setup menu ---------- */
+  document.getElementById("setupBtn").onclick=e=>{
+    const items=[{lbl:"Setup"},{t:"Categories…",f:openCategories},{t:"Ads / Content to be placed…",f:openPool},{t:"Sections…",f:openSections},{sep:1},{lbl:"View"},{t:"Display settings…",f:openDisplay},{t:"Print / Export PDF",f:()=>window.print()}];
+    ctxmenu.innerHTML=items.map((it,i)=>it.sep?'<div class="sep"></div>':it.lbl?'<div class="lbl">'+it.lbl+'</div>':'<div class="mi" data-i="'+i+'">'+it.t+'</div>').join("");
+    const r=e.target.getBoundingClientRect();ctxmenu.style.left=Math.min(r.left,window.innerWidth-220)+"px";ctxmenu.style.top=(r.bottom+4)+"px";ctxmenu.classList.add("show");
+    ctxmenu.querySelectorAll(".mi").forEach(m=>m.onclick=()=>{ctxmenu.classList.remove("show");items[+m.dataset.i].f();});
+  };
+
+  /* ---------- Categories manager ---------- */
+  function openCategories(){
+    modal.className="modal";
+    const rows=cats().map(c=>'<tr data-cid="'+c.id+'"><td><input type="color" class="ccolor" value="'+c.color+'"></td><td><input type="text" class="cname" value="'+esc(c.name)+'"></td><td style="text-align:right;"><button class="btn sm ghost cdel">Delete</button></td></tr>').join("");
+    modal.innerHTML='<div class="modal-b"><div class="modal-title">Categories</div><div class="zone-meta">Workflow statuses shown per zone and counted in the toolbar.</div><table class="grid"><tbody id="catRows">'+rows+'</tbody></table><button class="btn sm ghost" id="addCat" style="margin-top:10px;">+ Add category</button><div class="modal-foot"><button class="btn ghost" data-close>Cancel</button><button class="btn primary" id="saveCats">Save</button></div></div>';
+    modal.querySelectorAll("[data-close]").forEach(b=>b.onclick=closeModal);
+    modal.querySelectorAll(".cdel").forEach(b=>b.onclick=e=>e.target.closest("tr").remove());
+    document.getElementById("addCat").onclick=()=>{const tb=document.getElementById("catRows");const tr=document.createElement("tr");tr.dataset.cid=uid("cat");tr.innerHTML='<td><input type="color" class="ccolor" value="#888888"></td><td><input type="text" class="cname" value="New status"></td><td style="text-align:right;"><button class="btn sm ghost cdel">Delete</button></td>';tb.appendChild(tr);tr.querySelector(".cdel").onclick=()=>tr.remove();};
+    document.getElementById("saveCats").onclick=()=>{const next=[];modal.querySelectorAll("#catRows tr").forEach(tr=>{const name=tr.querySelector(".cname").value.trim();if(!name)return;next.push({id:tr.dataset.cid,name,color:tr.querySelector(".ccolor").value});});state.categories=next.length?next:defaultCats();save();closeModal();render();};
+    showModal();
+  }
+
+  /* ---------- Ads / Content to be placed ---------- */
+  function openPool(){
+    modal.className="modal";
+    const rows=state.pool.map(a=>'<tr><td>'+esc(a.text)+(a.placed?' <span class="badge-arch">Placed</span>':'')+'</td><td>'+esc(a.suggested||"")+'</td><td>'+esc(a.size||"")+'</td><td>'+esc(a.shape||"")+'</td><td style="text-align:right;"><button class="btn sm ghost" data-del="'+a.id+'">Delete</button></td></tr>').join("");
+    modal.innerHTML='<div class="modal-b"><div class="modal-title">Ads / Content to be placed</div><div class="info">Stage ads/content you intend to place later. Place them onto a page from the Edit dialog: tick <b>Advert</b> on a zone, then pick from the pool.</div>'
+      +'<table class="grid"><thead><tr><th>Item</th><th>Suggested page</th><th>Size</th><th>Shape</th><th></th></tr></thead><tbody>'+(rows||'<tr><td colspan=5 style="color:#999">No staged items yet.</td></tr>')+'</tbody></table>'
+      +'<div style="margin-top:14px;font-weight:700;font-size:13px;">Add item</div><label class="f">Text</label><input type="text" id="apText" placeholder="Advertiser / content name">'
+      +'<div style="display:flex;gap:10px;"><div style="flex:1"><label class="f">Suggested page numbers</label><input type="text" id="apSug" placeholder="e.g. 12 or “middle”"></div><div style="flex:1"><label class="f">Size</label><input type="text" id="apSize" placeholder="Full Page / 1/2 / 1/3"></div><div style="flex:1"><label class="f">Shape</label><input type="text" id="apShape" placeholder="Portrait / Landscape"></div></div>'
+      +'<div class="modal-foot"><button class="btn ghost" data-close>Close</button><button class="btn primary" id="addPool">Add to pool</button></div></div>';
+    modal.querySelectorAll("[data-close]").forEach(b=>b.onclick=closeModal);
+    modal.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{state.pool=state.pool.filter(a=>a.id!==b.dataset.del);save();openPool();});
+    document.getElementById("addPool").onclick=()=>{const t=document.getElementById("apText").value.trim();if(!t)return;state.pool.push({id:uid("a"),text:t,suggested:document.getElementById("apSug").value.trim(),size:document.getElementById("apSize").value.trim(),shape:document.getElementById("apShape").value.trim(),placed:false});save();openPool();};
+    showModal();
+  }
+
+  /* ---------- Sections calculator ---------- */
+  function openSections(){
+    modal.className="modal";const iss=activeIssue();
+    const rows=iss.sections.map(s=>'<tr data-sid="'+s.id+'"><td><input type="text" class="slabel" value="'+esc(s.label||"")+'"></td><td><input type="number" class="spages" min="0" step="2" value="'+s.pages+'" style="width:90px"></td><td style="text-align:right;"><button class="btn sm ghost sdel">Delete</button></td></tr>').join("");
+    const sum=iss.sections.reduce((a,s)=>a+(+s.pages||0),0);const actual=iss.pages.length;
+    modal.innerHTML='<div class="modal-b"><div class="modal-title">Sections</div><div class="info">A print-run calculator: define your paper signatures (even-sized) and check they total your actual page count. Sections don’t change your pages.</div>'
+      +'<table class="grid"><thead><tr><th>Section</th><th>Pages</th><th></th></tr></thead><tbody id="secRows">'+rows+'</tbody></table>'
+      +'<button class="btn sm ghost" id="addSec" style="margin-top:10px;">+ Add section</button>'
+      +'<div id="secSum" style="margin-top:14px;font-size:13px;"></div>'
+      +'<div class="modal-foot"><button class="btn ghost" data-close>Cancel</button><button class="btn primary" id="saveSecs">Save</button></div></div>';
+    modal.querySelectorAll("[data-close]").forEach(b=>b.onclick=closeModal);
+    const recompute=()=>{let s=0;modal.querySelectorAll("#secRows .spages").forEach(i=>s+=(+i.value||0));const el=document.getElementById("secSum");const ok=s===actual;el.innerHTML='Sections total <b>'+s+'</b> · flatplan has <b>'+actual+'</b> pages — <span class="'+(ok?"sum-ok":"sum-bad")+'">'+(ok?"balanced ✓":(s>actual?(s-actual)+" over":(actual-s)+" short"))+'</span>';};
+    const wireRow=tr=>{tr.querySelector(".sdel").onclick=()=>{tr.remove();recompute();};tr.querySelector(".spages").oninput=recompute;};
+    modal.querySelectorAll("#secRows tr").forEach(wireRow);
+    document.getElementById("addSec").onclick=()=>{const tb=document.getElementById("secRows");const tr=document.createElement("tr");tr.dataset.sid=uid("s");tr.innerHTML='<td><input type="text" class="slabel" value="Section"></td><td><input type="number" class="spages" min="0" step="2" value="16" style="width:90px"></td><td style="text-align:right;"><button class="btn sm ghost sdel">Delete</button></td>';tb.appendChild(tr);wireRow(tr);recompute();};
+    document.getElementById("saveSecs").onclick=()=>{const next=[];modal.querySelectorAll("#secRows tr").forEach(tr=>next.push({id:tr.dataset.sid,label:tr.querySelector(".slabel").value.trim(),pages:+tr.querySelector(".spages").value||0}));iss.sections=next;save();closeModal();};
+    recompute();showModal();
+  }
+
+  /* ---------- Display settings ---------- */
+  function openDisplay(){
+    modal.className="modal sm";const d=state.display;
+    modal.innerHTML='<div class="modal-b"><div class="modal-title">Display settings</div>'
+      +'<label class="chk" style="margin-top:6px;"><input type="checkbox" id="dThumbs" '+(d.thumbs?"checked":"")+'> Show content text in tiles</label>'
+      +'<label class="chk" style="margin-top:10px;"><input type="checkbox" id="dOver" '+(d.overlays?"checked":"")+'> Show ad-count overlay on tiles</label>'
+      +'<label class="f">Tile size</label><div class="radios row"><label><input type="radio" name="tsz" value="s" '+(d.tileSize==="s"?"checked":"")+'>Small</label><label><input type="radio" name="tsz" value="m" '+(d.tileSize==="m"?"checked":"")+'>Medium</label><label><input type="radio" name="tsz" value="l" '+(d.tileSize==="l"?"checked":"")+'>Large</label></div>'
+      +'<div class="modal-foot"><button class="btn ghost" data-close>Cancel</button><button class="btn primary" id="saveDisp">Apply</button></div></div>';
+    modal.querySelectorAll("[data-close]").forEach(b=>b.onclick=closeModal);
+    document.getElementById("saveDisp").onclick=()=>{d.thumbs=document.getElementById("dThumbs").checked;d.overlays=document.getElementById("dOver").checked;d.tileSize=modal.querySelector('input[name=tsz]:checked').value;save();closeModal();render();};
+    showModal();
+  }
+
+  /* ---------- misc ---------- */
   document.getElementById("issueSelect").onchange=e=>{state.activeIssueId=e.target.value;save();render();};
   function showModal(){overlay.classList.add("show");}
   function closeModal(){overlay.classList.remove("show");modal.innerHTML="";}
   overlay.addEventListener("click",e=>{if(e.target===overlay)closeModal();});
   document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeModal();ctxmenu.classList.remove("show");}});
-  document.addEventListener("click",e=>{if(!ctxmenu.contains(e.target))ctxmenu.classList.remove("show");});
+  document.addEventListener("click",e=>{if(!ctxmenu.contains(e.target)&&e.target.id!=="setupBtn")ctxmenu.classList.remove("show");});
 
-  /* ---------- boot ---------- */
   try{load();}catch(e){state=seed();}
   render();
   window.__flatplan={state:()=>state,activeIssue,render};
