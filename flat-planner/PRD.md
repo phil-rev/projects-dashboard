@@ -1,189 +1,108 @@
-# PRD: Magazine Flat Plan Demo Widget
+# PRD: Magazine Flat Plan Widget
 
-> **Status:** Built & verified (v2). Ships as `flat-planner/index.html`, hosted on
+> **Status:** v2 built & verified. Ships as `flat-planner/index.html`, hosted on
 > GitHub Pages, embedded via `<iframe>` in a HubSpot dashboard.
-> Revised from the original PRD after comparing against the reference screenshot
-> (`Dance Magazine July/August 2026 Flat Plan`) and the prior broken attempt.
-> Changes from the original are called out in **_Revision notes_**.
+> **v2 pivot:** after studying Blinkplan (app.blinkplan.com) in depth — via a
+> recorded feature walkthrough + hands-on notes — the widget was rebuilt from a
+> single-issue sales-inventory board into a **faithful Blinkplan-style flat-plan
+> editor**: multiple issues, per-page templates, per-zone content, workflow
+> categories, and archived history. (v1's sales Free/Claimed model is superseded;
+> it can be re-layered later — see §8.)
 
-## 1. Background
+## 1. Goal
 
-A prospect currently uses Magazine Manager to run their flat plan — a visual,
-page-by-page layout of an upcoming magazine issue showing which pages are booked
-by which advertiser, and which are still open. They are evaluating HubSpot to add
-sales structure to their ad-booking process, but HubSpot has no native flat-plan
-visualization. This widget recreates that specific tool as a standalone demo,
-embedded via `<iframe>` in a HubSpot dashboard for a sales demo.
+A single, self-contained HTML flat-plan editor that mirrors Blinkplan's core
+model closely enough to demo to a prospect, running inside a cross-origin HubSpot
+dashboard iframe with no backend, build step, or dependencies.
 
-A reference screenshot of the real tool defines the exact visual layout this must
-match. Company/advertiser names in the reference are redacted — all names in this
-demo are placeholder-safe.
+## 2. Blinkplan model being mirrored (source of truth)
 
-## 2. Goal
+From the walkthrough + docs, the three capabilities the prospect cares about:
 
-Ship a single, self-contained, working HTML demo that:
-- Visually matches the reference flat plan layout (Section 4).
-- Lets a sales rep claim a free page for an advertiser, free a claimed page, and
-  drag-and-drop move/swap bookings — mirroring how reps use Magazine Manager today.
-- Runs reliably inside a **cross-origin** iframe with no backend, no build step,
-  no external dependencies.
+- **New flatplan per issue** — modal with **Issue** name, **Single pages** toggle,
+  **Portrait/Landscape/Square**, and clone choice: *empty / clone layout only /
+  clone layout + content*. Creating then adding pages auto-generates print-style
+  labels: standalone **Cover**, **IFC**, sequential numbered spreads, **IBC**,
+  standalone **Back**.
+- **Per-page layout templates** — click a page → **Change template** → a library of
+  zone subdivisions; picking one re-splits the page. Each zone independently holds
+  **content** (live-previewed in the thumbnail), an **Advert** flag (hatches the
+  zone, disables its text field), and a **Category** workflow status.
+- **Historicals** — issues live in a picker and can be **archived** (never deleted),
+  staying retrievable for history.
 
-This is a sales demo artifact, not a production app. Correctness and visual
-fidelity to the reference matter more than code architecture.
+## 3. What shipped (v2)
 
-## 3. Users
-
-- **Sales rep (only editor):** claims pages, frees pages, drags bookings.
-- **Production (view-only in the real product):** out of scope for v1.
-
-## 4. Layout Spec (matches reference screenshot)
-
-- **Header:** bold title "Dance Magazine July/August 2026 Flat Plan", left-aligned,
-  **plain sans-serif, black on white**. Utilitarian, not branded.
-  **_Revision note:_** the prior attempt used a Georgia serif title with an em-dash
-  and an uppercase subtitle — wrong. Now plain bold sans-serif, exact reference text.
-- **Grid structure:** a **wrapping contact-sheet grid**. Spread units (left page +
-  right page pairs) flow left-to-right and **wrap** to a new line based on container
-  width, like a printed contact sheet.
-  **_Revision note (most important fix):_** the prior attempt rendered **one spread
-  per row**, producing ~40 stacked lines down the page — nothing like the reference.
-  Now a single `flex-wrap` container of fixed-width spreads.
-- **Each page tile** is a bordered box containing, top to bottom:
-  1. **Size label, top-left, bold** ("Full Page", "2 Page Spread", "2/3 Page",
-     "1/3", "1/2", "1/6").
-  2. A content/advertiser block (advertiser name, or an editorial note like "TOC").
-  3. **Page number as a caption BELOW the box, outside the border** ("Page 41",
-     "0-1", "72-1").
-  **_Revision note:_** the prior attempt put the page number *inside* the tile at
-  the top. It is now a caption underneath, per the reference.
-- **Special / cover pages:** front cover (0-1), inside-front-cover spread (0-2),
-  inside back cover (72-1), outside back cover (72-2) get a **salmon/pink border**,
-  independent of sold/available status.
-- **Split pages within one page slot** (share one page-number caption):
-  - `2/3 + 1/3` → wide + narrow tile, side by side (Page 41, Page 69).
-  - `1/2 + 1/2` → equal-width tiles side by side (Page 43).
-  - `2/3 + 1/6 + 1/6` → one wide tile plus two small tiles stacked vertically
-    beside it (Page 67).
-  **_Revision note:_** splits are modeled as sub-tiles of one page slot so they
-  share a single caption and keep correct width proportions. The prior attempt
-  flattened splits into the row (breaking proportions and captions) and put the
-  stacked-1/6 split on the wrong page.
-- **Color coding — exactly two states plus special accents:**
-  - **White** = Free (editorial/unsold).
-  - **Teal** = Claimed.
-  - **Salmon border** = cover/special position (independent of status).
-  - **Yellow fill** = outside back cover (72-2) accent only.
-  **_Revision note:_** the reference shows a second fill color (light blue); per the
-  original PRD's own instruction we collapse to exactly **Free / Claimed**. The prior
-  attempt used dark green for claimed and gold *fill* for all specials — wrong;
-  specials are a border, and only the back cover is yellow.
-- **Legend:** key in the header showing Free / Claimed / Cover-special / Back cover.
-- **Inventory stat:** running count of claimed vs. free vs. total page slots in the
-  toolbar, so a rep sees inventory at a glance.
-
-The grid is generated from a data structure (Section 6), not hand-coded DOM.
-
-## 5. Interactions
-
-1. **Click a Free tile** → popover: advertiser name input + size select (defaults to
-   the tile's current size) → Save sets it to Claimed, fills the advertiser, recolors,
-   closes. Enter key also saves; empty name is rejected.
-2. **Click a Claimed tile** → popover shows advertiser + size and a "Free this page"
-   button that resets it to Free.
-3. **Drag a Claimed tile onto a Free tile** → the booking (advertiser + status) moves
-   to the target; the origin becomes Free.
-4. **Drag a Claimed tile onto another Claimed tile** → the two bookings swap.
-5. All changes persist immediately via `localStorage` (no save button).
-6. **Reset button** restores the original seed data.
-7. **Escape / click-outside** closes the popover.
-
-**_Revision note — size stays with the physical slot:_** dragging moves the
-*advertiser + status*, not the size. A page's printed geometry (a 1/3 slot, a 1/6
-slot) is fixed — Section 8 explicitly excludes runtime re-splitting — so a booking
-cannot carry its size into a differently-shaped slot without breaking the layout.
-The size selector on the claim form updates that slot's own label only.
-
-## 6. Data Model
-
-State is a map of page-slot objects (a slot renders as one tile, or several
-side-by-side/stacked tiles sharing a page number):
-
+**Data model** (one `localStorage` key, iframe-safe):
 ```js
-{
-  id: "41-2/3",        // unique per tile
-  pageNumber: "41",     // shared across tiles that split one page
-  size: "2/3",          // "Full Page" | "2-Page Spread" | "2/3" | "1/2" | "1/3" | "1/6"
-  status: "Free",       // "Free" | "Claimed"
-  advertiser: "",        // empty when Free
-  note: "",              // editorial label, e.g. "TOC", "Cover"
-  special: false,        // salmon border (cover positions), independent of status
-  backcover: false       // yellow fill (outside back cover only)
-}
+{ activeIssueId,
+  issues: { <id>: {
+    id, title, orientation, singlePages, archived, createdAt,
+    pages: [ { id, label, kind, locked, notes, templateId,
+               zones: [ { id, label, content, advert, category } ] } ]
+  } } }
 ```
+- `kind` ∈ cover | ifc | page | ibc | back (specials get a salmon border).
+- Templates are a curated library of 9 zone layouts: Full, 1/2 v, 1/2 h,
+  2/3+1/3, 1/3+2/3, 2/3+1/6+1/6, 1/3×3, 1/2+1/4+1/4, 1/4×4 — each zone carries a
+  Blinkplan-style size label ("2/3 vertical", "1/4 square", …).
+- Categories: In progress (amber) · Approved (blue) · Final (green), with running
+  per-category page counts in the toolbar.
 
-A separate **layout** array (built from the seed, not hand-maintained) describes how
-slots group into the printed grid: singles (0-1, 72-2), the inside-front-cover
-2-page spread (0-2, captioned "0-2 / Page 1" — page 1 is absorbed into this spread
-and is not a separate slot), normal facing-page pairs (2-3 … 70-71, then 72 / 72-1),
-and the four splits (41, 43, 67, 69).
+**Features**
+- **Issue picker** (top-bar dropdown) + **Manage issues** modal listing all issues
+  incl. archived, with page/ad counts, Open, Archive/Unarchive, and Reset-demo.
+- **New flatplan** modal (name / single-pages / orientation / clone empty|layout|all).
+- **+ Pages** and per-page **⋮ menu**: Insert pages, Copy content across next N,
+  Lock/Unlock, Delete (specials protected) — with automatic renumbering.
+- **Edit Page** dialog (Content + Notes tabs; Tags/Comments stubbed): Change
+  Template library, click-a-zone selection, per-zone content field with **live
+  thumbnail preview**, Advert checkbox (hatch + disable), Category dropdown, and a
+  Move/swap action.
+- **Drag** a page onto another to move/swap its template+content (label/kind stay
+  with the physical slot).
+- **Spread pairing**: Cover standalone, [IFC…IBC] paired 2-by-2, Back standalone;
+  Single-pages mode lays every page out standalone.
 
-Seeded with **80 page slots** mirroring the reference: split patterns at pages 41,
-43, 67, 69; salmon-bordered covers; a yellow outside back cover; and ~19 pre-claimed
-tiles with placeholder advertiser names so the board isn't empty on load.
+## 4. Technical constraints (unchanged from v1)
 
-## 7. Technical Constraints
+- Single HTML file, inline CSS/JS, no CDN/npm/build/frameworks.
+- Must render inside a **cross-origin** iframe — all `localStorage` access wrapped
+  in try/catch so a blocked/partitioned storage context still renders (this was
+  v1's "zero pages" bug; retained the fix).
+- No console errors on any interaction path.
 
-- **Single HTML file.** Inline `<style>` and `<script>`. No CDN, no npm, no build,
-  no frameworks.
-- **Must render correctly inside a cross-origin `<iframe>`.** No full-viewport
-  assumptions. **All `localStorage` access is wrapped in try/catch** — a HubSpot
-  cross-origin embed can partition/block storage and throw on access; the grid must
-  still render (degrading to in-memory state).
-  **_Revision note:_** this was the root cause of the "zero visible pages" bug. The
-  prior version's boot threw a `SecurityError` on `localStorage.getItem` inside the
-  iframe before any tile rendered.
-- **State persistence via `localStorage` only** (best-effort), no backend, no network.
-- **No console errors under any interaction path.** Verified with a headless-Chrome
-  harness covering: grid populates, click-claim, click-free, drag claimed→free, drag
-  claimed↔claimed, refresh persistence, reset, and cross-origin iframe embedding.
+## 5. Verification — all passing ✅
 
-## 8. Out of Scope for v1
+Headless-Chrome harness (`verify2.js`): board populates (16 tiles) · 2 seed issues
+in picker · change template (zone count updates) · per-zone content live-preview ·
+advert disables field + hatches zone · edit persists (advert+category) · new empty
+flatplan (correct page count, no content) · clone-all copies content · clone-layout
+keeps templates & drops content · add pages (+N, renumber) · archive toggles &
+retains issue · drag swap · reload persistence · **no console errors**. Plus prior
+cross-origin-iframe render check.
 
-- HubSpot API / real CRM data
-- Separate read-only production view
-- Multi-issue switching / issue selector
-- Runtime re-splitting of a page's configuration
-- Auth, multi-user real-time sync
-- Print/PDF export
+## 6. Deferred (Blinkplan has; not needed for the core demo)
 
-## 9. Acceptance Checklist — all verified ✅
+Ads/Content-to-be-Placed staging pool · Sections calculator · Stitch-ins ·
+Notes/Tags/Comments full tabs (Notes is functional; Tags/Comments stubbed) ·
+thumbnail image upload · real-time multi-user collaboration.
 
-- [x] Opens rendering a full grid immediately, no blank page, no console errors.
-- [x] Layout matches the reference: size label in tile, page number caption below
-      the tile, spreads in a wrapping grid, splits (2/3+1/3, 1/2+1/2, stacked 1/6s)
-      correct.
-- [x] Cover/special pages show a distinct border independent of claimed status;
-      outside back cover is yellow.
-- [x] Clicking a Free tile opens a working claim form that updates the tile.
-- [x] Clicking a Claimed tile opens a working free/release action.
-- [x] Dragging Claimed→Free moves the booking; origin frees.
-- [x] Dragging Claimed↔Claimed swaps both.
-- [x] Refresh preserves state via localStorage (where storage is available).
-- [x] Reset restores the original seed data.
-- [x] Works opened directly **and** embedded via a cross-origin `<iframe>`.
+## 7. Hosting & embedding
 
-## 10. Hosting & Embedding
-
-Hosted on the existing **GitHub Pages** site (`projects-dashboard`, `main` branch,
-root). Live URL:
-
+GitHub Pages (`projects-dashboard`, `main` root):
 ```
 https://phil-rev.github.io/projects-dashboard/flat-planner/
 ```
-
-Embed in a HubSpot dashboard (single-object "iframe" / rich-text module):
-
 ```html
 <iframe src="https://phil-rev.github.io/projects-dashboard/flat-planner/"
         style="width:100%;height:900px;border:0;" title="Magazine Flat Plan"></iframe>
 ```
+
+## 8. Production path (beyond the demo)
+
+`localStorage` is per-browser/per-device and not shared across a team. A real
+multi-issue archive should persist server-side — the natural fit is **HubSpot
+custom objects** (`Issue` → `Page` → `Zone/Booking`), which also lets the flat plan
+tie to real CRM deals and reintroduce the sales-inventory lens (Free/Claimed,
+advertiser = company/deal) on top of this production-planning structure.

@@ -6,545 +6,546 @@
 <title>Magazine Flat Plan</title>
 <style>
   :root{
-    --ink:#1a1a1a;
-    --muted:#6a6a6a;
-    --paper:#ffffff;
-    --line:#c7c7c7;
-    --free:#ffffff;
-    --claimed:#49c5cb;          /* teal - a claimed/sold page */
-    --claimed-text:#0d3d40;
-    --special-border:#e8998a;   /* salmon - cover/special positions */
-    --backcover:#ffe100;        /* yellow accent - outside back cover */
-    --dragover:#1f8f95;
+    --ink:#1a1a1a; --muted:#6a6a6a; --line:#c7c7c7; --line2:#e4e4e4;
+    --teal:#1f8f95; --teal-bright:#49c5cb;
+    --special:#e8998a;            /* salmon - cover positions */
+    --zone-line:#b9b9b9;
+    --cat-progress:#e8a43c; --cat-approved:#3f86c6; --cat-final:#3ba36b;
   }
   *{box-sizing:border-box;}
-  html,body{
-    margin:0;padding:0;
-    background:var(--paper);
-    color:var(--ink);
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-    -webkit-font-smoothing:antialiased;
-  }
-  .wrap{ padding:18px 22px 48px; }
+  html,body{margin:0;padding:0;background:#fff;color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;}
+  button{font-family:inherit;}
+  .app{display:flex;flex-direction:column;min-height:100vh;}
 
-  header{
-    display:flex;
-    align-items:flex-start;
-    justify-content:space-between;
-    flex-wrap:wrap;
-    gap:14px;
-    margin-bottom:14px;
-  }
-  header h1{
-    font-size:22px;
-    font-weight:700;
-    margin:0;
-    color:#000;
-    letter-spacing:-0.01em;
-  }
-  .legend{
-    display:flex;
-    gap:16px;
-    align-items:center;
-    font-size:12px;
-    color:#333;
-    flex-wrap:wrap;
-  }
-  .legend .item{display:flex;align-items:center;gap:6px;}
-  .swatch{
-    width:14px;height:14px;border-radius:2px;
-    border:1px solid rgba(0,0,0,0.2);
-    display:inline-block;
-  }
-  .swatch.special{background:#fff;border:2px solid var(--special-border);}
+  /* top bar */
+  .topbar{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--line2);flex-wrap:wrap;}
+  .brand{font-weight:800;color:var(--teal);font-size:18px;letter-spacing:-.02em;}
+  .issue-select{display:flex;align-items:center;gap:6px;}
+  .issue-select select{font-size:14px;font-weight:600;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:#fff;max-width:320px;}
+  .badge-arch{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#9a6a00;background:#fff3d6;border:1px solid #f0d488;border-radius:4px;padding:2px 6px;}
+  .spacer{flex:1;}
+  .tbtn{font-size:12.5px;background:#fff;border:1px solid var(--line);color:#333;padding:7px 11px;border-radius:6px;cursor:pointer;white-space:nowrap;}
+  .tbtn:hover{border-color:#999;color:#000;}
+  .tbtn.primary{background:var(--teal);color:#fff;border-color:var(--teal);}
+  .tbtn.primary:hover{background:#187478;}
 
-  .toolbar{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:18px;
-    gap:12px;
-    flex-wrap:wrap;
-    border-top:1px solid #ececec;
-    border-bottom:1px solid #ececec;
-    padding:8px 0;
-  }
-  .stat{ font-size:13px; color:#333; }
-  .stat b{ color:#000; font-weight:700; }
-  .stat .dot{ color:#c7c7c7; margin:0 8px; }
-  button.reset{
-    font-size:12px;
-    background:#fff;
-    border:1px solid var(--line);
-    color:#444;
-    padding:7px 12px;
-    border-radius:6px;
-    cursor:pointer;
-  }
-  button.reset:hover{ border-color:#999; color:#000; }
+  /* toolbar / stats */
+  .toolbar{display:flex;align-items:center;gap:14px;padding:9px 16px;border-bottom:1px solid var(--line2);flex-wrap:wrap;}
+  h1.title{font-size:16px;font-weight:700;margin:0;color:#000;}
+  .cats{display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:12px;color:#333;}
+  .cats .c{display:flex;align-items:center;gap:5px;}
+  .cats .dotc{width:11px;height:11px;border-radius:2px;display:inline-block;border:1px solid rgba(0,0,0,.15);}
+  .stat{font-size:12.5px;color:#333;}
+  .stat b{color:#000;}
 
-  /* --- board: a wrapping contact-sheet grid of spreads --- */
-  .board{
-    display:flex;
-    flex-wrap:wrap;
-    align-items:flex-start;
-    gap:14px 12px;
-  }
-  .spread{ display:flex; gap:0; }
-  .spread.single{ }              /* one page wide */
-  .page{
-    display:flex;
-    flex-direction:column;
-    width:76px;                  /* one printed page */
-  }
-  .spread.wide .page{ width:152px; } /* a spread booked as one 2-page unit */
+  /* board */
+  .board-wrap{padding:16px;overflow:auto;flex:1;}
+  .board{display:flex;flex-wrap:wrap;align-items:flex-start;gap:16px 12px;}
+  .spread{display:flex;gap:0;}
+  .page{display:flex;flex-direction:column;width:88px;}
 
-  .tilebox{
-    position:relative;
-    background:var(--free);
-    border:1.5px solid var(--line);
-    height:92px;
-    padding:5px 6px;
-    cursor:pointer;
-    overflow:hidden;
-    display:flex;
-    flex-direction:column;
-    transition:box-shadow .1s ease, transform .1s ease;
-    user-select:none;
-  }
-  .tilebox:hover{ box-shadow:0 2px 10px rgba(0,0,0,0.18); transform:translateY(-1px); z-index:2; }
-  .tilebox .size{
-    font-size:10px;
-    font-weight:700;
-    color:inherit;
-    line-height:1.1;
-  }
-  .tilebox .body{
-    flex:1;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    text-align:center;
-  }
-  .tilebox .adv{
-    font-size:9.5px;
-    font-weight:600;
-    line-height:1.15;
-    overflow-wrap:break-word;
-    word-break:normal;
-    hyphens:none;
-    max-width:100%;
-  }
-  .tilebox .note{ font-size:9.5px; color:var(--muted); font-weight:600; }
+  .tile{position:relative;width:88px;height:118px;border:1.5px solid var(--line);background:#fff;cursor:pointer;overflow:hidden;transition:box-shadow .1s,transform .1s;}
+  .tile:hover{box-shadow:0 3px 12px rgba(0,0,0,.18);transform:translateY(-1px);z-index:3;}
+  .tile.special{border:2px solid var(--special);}
+  .tile.locked{cursor:not-allowed;}
+  .tile.dragging{opacity:.35;}
+  .tile.dragover{outline:2px dashed var(--teal);outline-offset:-2px;}
+  .zone{position:absolute;border:.5px solid var(--zone-line);display:flex;align-items:center;justify-content:center;text-align:center;padding:2px;overflow:hidden;}
+  .zone .zt{font-size:7.5px;line-height:1.1;font-weight:600;color:#222;word-break:break-word;max-height:100%;overflow:hidden;}
+  .zone.advert{background:repeating-linear-gradient(45deg,#eee,#eee 3px,#d7d7d7 3px,#d7d7d7 6px);}
+  .zone.catbar{border-left-width:3px;}
+  .lockicon{position:absolute;top:2px;right:3px;font-size:9px;color:#888;z-index:2;}
+  .caption{display:flex;justify-content:center;font-size:11px;color:#222;padding:3px 1px 0;min-height:15px;font-weight:600;}
+  .pagemenu{position:absolute;top:1px;right:2px;font-size:12px;color:#999;cursor:pointer;line-height:1;padding:1px 3px;z-index:2;border-radius:3px;}
+  .pagemenu:hover{background:#eee;color:#333;}
 
-  .tilebox.claimed{ background:var(--claimed); color:var(--claimed-text); border-color:#37b0b6; }
-  .tilebox.special{ border:2px solid var(--special-border); }
-  .tilebox.backcover{ background:var(--backcover); color:#3a3300; border-color:var(--special-border); }
+  /* generic overlay + panels */
+  .overlay{position:fixed;inset:0;background:rgba(20,20,20,.42);display:none;align-items:center;justify-content:center;z-index:60;padding:16px;}
+  .overlay.show{display:flex;}
+  .modal{background:#fff;border-radius:10px;box-shadow:0 18px 48px rgba(0,0,0,.32);width:520px;max-width:100%;max-height:90vh;overflow:auto;}
+  .modal.sm{width:320px;}
+  .modal-b{padding:16px 18px 18px;}
+  label.f{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:14px 0 5px;}
+  input[type=text],select,textarea{width:100%;padding:9px;border:1px solid var(--line);border-radius:6px;font-size:14px;font-family:inherit;background:#fff;}
+  textarea{min-height:70px;resize:vertical;}
+  .radios{display:flex;flex-direction:column;gap:7px;font-size:14px;}
+  .radios.row{flex-direction:row;gap:16px;}
+  .radios label{display:flex;align-items:center;gap:7px;cursor:pointer;}
+  .chk{display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer;}
+  .modal-foot{display:flex;gap:8px;justify-content:flex-end;align-items:center;margin-top:20px;}
+  .btn{padding:9px 14px;border-radius:6px;border:none;font-size:13px;font-weight:600;cursor:pointer;}
+  .btn.primary{background:var(--teal);color:#fff;} .btn.primary:hover{background:#187478;}
+  .btn.ghost{background:none;color:var(--muted);} .btn.ghost:hover{color:#000;}
 
-  .tilebox.dragging{ opacity:.35; }
-  .tilebox.dragover{ outline:2px dashed var(--dragover); outline-offset:-2px; box-shadow:0 0 0 2px rgba(31,143,149,.25); }
+  /* edit page dialog */
+  .tabs{display:flex;gap:0;border-bottom:1px solid var(--line2);margin:6px 0 14px;}
+  .tab{padding:8px 12px;font-size:12px;font-weight:700;letter-spacing:.03em;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;text-transform:uppercase;}
+  .tab.active{color:var(--ink);border-bottom-color:var(--teal);}
+  .tab.disabled{opacity:.4;cursor:default;}
+  .edit-grid{display:flex;gap:18px;}
+  .edit-left{flex:0 0 150px;}
+  .prev{position:relative;width:150px;height:200px;border:1.5px solid var(--line);background:#fff;}
+  .prev .zone{cursor:pointer;}
+  .prev .zone.sel{outline:2px solid #d0402a;outline-offset:-2px;z-index:2;}
+  .prev .zone .zt{font-size:9px;}
+  .change-tpl{margin-top:8px;font-size:12px;font-weight:700;color:var(--teal);cursor:pointer;letter-spacing:.03em;}
+  .edit-right{flex:1;min-width:0;}
+  .zone-meta{font-size:12px;color:var(--muted);margin-bottom:8px;}
+  .move-link{float:right;font-size:12px;font-weight:700;color:var(--teal);cursor:pointer;letter-spacing:.03em;}
 
-  /* caption BELOW the tile, outside the border */
-  .caption{
-    display:flex;
-    justify-content:space-between;
-    font-size:11px;
-    color:#222;
-    padding:3px 1px 0;
-    min-height:16px;
-  }
-  .caption .r{ margin-left:auto; }
+  /* template picker */
+  .tpl-lib{display:flex;flex-direction:column;gap:14px;}
+  .tpl-row h4{margin:0 0 7px;font-size:12px;font-weight:700;color:#333;}
+  .tpl-thumbs{display:flex;flex-wrap:wrap;gap:10px;}
+  .tpl-thumb{position:relative;width:64px;height:86px;border:1.5px solid var(--line);cursor:pointer;background:#fff;}
+  .tpl-thumb:hover{border-color:var(--teal);box-shadow:0 2px 8px rgba(0,0,0,.15);}
+  .tpl-thumb.cur{border-color:var(--teal);box-shadow:0 0 0 2px rgba(31,143,149,.3);}
+  .tpl-name{font-size:9px;text-align:center;color:#666;margin-top:2px;width:64px;}
 
-  /* split page slots */
-  .split-row{ display:flex; height:92px; }
-  .split-row .tilebox{ height:100%; }
-  .split-col{ display:flex; flex-direction:column; }
-  .split-col .tilebox{ height:50%; }
-  /* proportional widths inside a split */
-  .fr-2_3{ flex:2 1 0; } .fr-1_3{ flex:1 1 0; } .fr-1_2{ flex:1 1 0; } .fr-1_6{ flex:1 1 0; }
-
-  /* --- popover --- */
-  .overlay{
-    position:fixed; inset:0;
-    background:rgba(20,20,20,.4);
-    display:none; align-items:center; justify-content:center;
-    z-index:50; padding:16px;
-  }
-  .overlay.show{ display:flex; }
-  .panel{
-    background:#fff;
-    border-radius:10px;
-    box-shadow:0 16px 44px rgba(0,0,0,.3);
-    padding:20px 20px 18px;
-    width:280px;
-    max-width:100%;
-    font-size:14px;
-  }
-  .panel h3{ margin:0 0 3px; font-size:16px; font-weight:700; }
-  .panel .meta{ font-size:12px; color:var(--muted); margin-bottom:14px; }
-  .panel label{
-    display:block; font-size:11px; text-transform:uppercase; letter-spacing:.05em;
-    color:var(--muted); margin:12px 0 5px;
-  }
-  .panel input[type=text], .panel select{
-    width:100%; padding:9px 9px; border:1px solid var(--line); border-radius:6px;
-    font-size:14px; font-family:inherit; background:#fff;
-  }
-  .panel .row-btns{ display:flex; gap:8px; margin-top:18px; align-items:center; }
-  .panel button{
-    padding:9px 12px; border-radius:6px; border:none; font-size:13px; font-weight:600; cursor:pointer;
-  }
-  .btn-save{ flex:1; background:#1f8f95; color:#fff; }
-  .btn-save:hover{ background:#187478; }
-  .btn-free{ flex:1; background:#fbeae6; color:#c0442c; }
-  .btn-free:hover{ background:#f6d8d1; }
-  .btn-cancel{ background:none; color:var(--muted); }
-  .btn-cancel:hover{ color:#000; }
-  .hint{ font-size:12px; color:var(--muted); margin-top:20px; line-height:1.5; }
+  .hint{font-size:12px;color:var(--muted);padding:10px 16px 24px;}
+  .menu{position:fixed;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.2);z-index:70;min-width:190px;padding:5px 0;font-size:13px;display:none;}
+  .menu.show{display:block;}
+  .menu .mi{padding:8px 14px;cursor:pointer;white-space:nowrap;}
+  .menu .mi:hover{background:#f0f7f7;}
+  .menu .mi.danger{color:#c0442c;}
+  .menu .sep{height:1px;background:var(--line2);margin:4px 0;}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <h1>Dance Magazine July/August 2026 Flat Plan</h1>
-    <div class="legend">
-      <span class="item"><span class="swatch" style="background:var(--free)"></span>Free</span>
-      <span class="item"><span class="swatch" style="background:var(--claimed)"></span>Claimed</span>
-      <span class="item"><span class="swatch special"></span>Cover / special</span>
-      <span class="item"><span class="swatch" style="background:var(--backcover)"></span>Outside back cover</span>
+<div class="app">
+  <div class="topbar">
+    <span class="brand">flatplan</span>
+    <div class="issue-select">
+      <select id="issueSelect" title="Switch issue"></select>
+      <span class="badge-arch" id="archBadge" style="display:none">Archived</span>
     </div>
-  </header>
-
-  <div class="toolbar">
-    <div class="stat"><b id="claimedCount">0</b> claimed<span class="dot">·</span><b id="freeCount">0</b> free<span class="dot">·</span><b id="totalCount">0</b> page slots</div>
-    <button class="reset" id="resetBtn">Reset demo data</button>
+    <span class="spacer"></span>
+    <button class="tbtn" id="addPagesBtn">+ Pages</button>
+    <button class="tbtn" id="manageBtn">Manage issues</button>
+    <button class="tbtn primary" id="newIssueBtn">New flatplan</button>
   </div>
 
-  <div class="board" id="board"></div>
+  <div class="toolbar">
+    <h1 class="title" id="issueTitle">—</h1>
+    <span class="spacer"></span>
+    <div class="cats" id="catStats"></div>
+    <div class="stat" id="pageStat"></div>
+  </div>
 
-  <div class="hint">Click a free page to claim it for an advertiser · click a claimed page to release it · drag any claimed page onto another page to move or swap the booking.</div>
+  <div class="board-wrap"><div class="board" id="board"></div></div>
+  <div class="hint">Click a page to change its template and add content per zone. Drag a page onto another to move/swap. Use the page ⋮ menu for insert / delete / lock.</div>
 </div>
 
-<div class="overlay" id="overlay">
-  <div class="panel" id="panel"></div>
-</div>
+<div class="overlay" id="overlay"><div class="modal" id="modal"></div></div>
+<div class="menu" id="ctxmenu"></div>
 
 <script>
 (function(){
   "use strict";
-  const STORAGE_KEY = "flatplan_dance_v2";
-  const SIZES = ["Full Page","2-Page Spread","2/3","1/2","1/3","1/6"];
-  const SIZE_LABEL = {
-    "Full Page":"Full Page","2-Page Spread":"2 Page Spread",
-    "2/3":"2/3 Page","1/2":"1/2","1/3":"1/3","1/6":"1/6"
-  };
-  const SIZE_FR = {"2/3":"fr-2_3","1/3":"fr-1_3","1/2":"fr-1_2","1/6":"fr-1_6"};
+  const KEY="flatplan_v3";
 
-  // ---------- seed data (mirrors the reference flat plan) ----------
-  function seed(){
-    const pages = {};
-    const P = (id, pageNumber, size, opts) => {
-      opts = opts || {};
-      pages[id] = {
-        id, pageNumber, size,
-        status: opts.status || "Free",
-        advertiser: opts.advertiser || "",
-        note: opts.note || "",
-        special: !!opts.special,
-        backcover: !!opts.backcover
-      };
-    };
-    const C = (adv) => ({status:"Claimed", advertiser:adv});
+  /* ---------- iframe-safe storage ---------- */
+  const lsGet=k=>{try{return window.localStorage.getItem(k)}catch(e){return null}};
+  const lsSet=(k,v)=>{try{window.localStorage.setItem(k,v)}catch(e){}};
+  let seq=0; const uid=p=>(p||"id")+"_"+(seq++)+"_"+Math.floor(Math.random()*1e6);
 
-    // covers / specials
-    P("0-1","0-1","Full Page",{special:true, note:"Cover"});
-    P("0-2","0-2","2-Page Spread",Object.assign({special:true},C("Allegro Dancewear")));
+  /* ---------- curated template library ---------- */
+  // zones use fractional geometry {x,y,w,h} in 0..1; label mirrors Blinkplan's naming
+  const Z=(x,y,w,h,label)=>({x,y,w,h,label});
+  const TEMPLATES=[
+    {id:"full",  name:"Full page", group:"1 column", zones:[Z(0,0,1,1,"full")]},
+    {id:"half-v",name:"1/2 + 1/2 vertical", group:"2 column", zones:[Z(0,0,.5,1,"1/2 vertical"),Z(.5,0,.5,1,"1/2 vertical")]},
+    {id:"half-h",name:"1/2 + 1/2 horizontal", group:"2 row", zones:[Z(0,0,1,.5,"1/2 horizontal"),Z(0,.5,1,.5,"1/2 horizontal")]},
+    {id:"tt-third",name:"2/3 + 1/3", group:"2 column", zones:[Z(0,0,.667,1,"2/3 vertical"),Z(.667,0,.333,1,"1/3 vertical")]},
+    {id:"third-tt",name:"1/3 + 2/3", group:"2 column", zones:[Z(0,0,.333,1,"1/3 vertical"),Z(.333,0,.667,1,"2/3 vertical")]},
+    {id:"tt-sixths",name:"2/3 + 1/6 + 1/6", group:"3 zone", zones:[Z(0,0,.667,1,"2/3 vertical"),Z(.667,0,.333,.5,"1/6"),Z(.667,.5,.333,.5,"1/6")]},
+    {id:"thirds-v",name:"1/3 x 3", group:"3 column", zones:[Z(0,0,.333,1,"1/3 vertical"),Z(.333,0,.334,1,"1/3 vertical"),Z(.667,0,.333,1,"1/3 vertical")]},
+    {id:"half-quarters",name:"1/2 + 1/4 + 1/4", group:"3 zone", zones:[Z(0,0,.5,1,"1/2 vertical"),Z(.5,0,.5,.5,"1/4 square"),Z(.5,.5,.5,.5,"1/4 square")]},
+    {id:"quarters",name:"1/4 x 4", group:"4 zone", zones:[Z(0,0,.5,.5,"1/4 square"),Z(.5,0,.5,.5,"1/4 square"),Z(0,.5,.5,.5,"1/4 square"),Z(.5,.5,.5,.5,"1/4 square")]}
+  ];
+  const tplById=id=>TEMPLATES.find(t=>t.id===id)||TEMPLATES[0];
 
-    // regular run, pages 1..72 default to a free Full Page
-    for(let n=1;n<=72;n++) P(String(n), String(n), "Full Page", {});
-    // page 1 is absorbed into the inside-front-cover 2-page spread (0-2), not a separate slot
-    delete pages["1"];
+  const CATEGORIES=[
+    {id:"progress",name:"In progress",color:"var(--cat-progress)"},
+    {id:"approved",name:"Approved",color:"var(--cat-approved)"},
+    {id:"final",name:"Final",color:"var(--cat-final)"}
+  ];
+  const catById=id=>CATEGORIES.find(c=>c.id===id);
 
-    // editorial
-    pages["3"].note = "TOC";
-    pages["4"].note = "TOC";
+  /* ---------- zones for a page from a template ---------- */
+  function makeZones(tplId, carry){
+    const t=tplById(tplId);
+    return t.zones.map((z,i)=>({
+      id:uid("z"), label:z.label,
+      content:(carry&&carry[i]?carry[i].content:"")||"",
+      advert:(carry&&carry[i]?!!carry[i].advert:false),
+      category:(carry&&carry[i]?carry[i].category:"")||""
+    }));
+  }
 
-    // pre-sold full pages
-    Object.assign(pages["2"],  C("Pointe Perfect"));
-    Object.assign(pages["5"],  C("Studio Pro Academy"));
-    Object.assign(pages["7"],  C("Center Stage Co."));
-    Object.assign(pages["9"],  C("Pirouette Apparel"));
-    Object.assign(pages["11"], C("Grand Jeté Footwear"));
-    Object.assign(pages["17"], C("Motif Dance"));
-    Object.assign(pages["33"], C("Rhythm & Form"));
-    Object.assign(pages["39"], C("Encore Studios"));
-    Object.assign(pages["49"], C("Prima Collective"));
-    Object.assign(pages["51"], C("Barre Method Co."));
-    Object.assign(pages["65"], C("Turnout Textiles"));
-    Object.assign(pages["71"], C("City Dance Center"));
-
-    // splits — replace those single full pages with sub-tiles
-    delete pages["41"]; delete pages["43"]; delete pages["67"]; delete pages["69"];
-    P("41-2/3","41","2/3",{});
-    P("41-1/3","41","1/3",C("Adagio Media"));
-    P("43-a","43","1/2",{});
-    P("43-b","43","1/2",C("Tempo Athletics"));
-    P("67-2/3","67","2/3",{});
-    P("67-1/6a","67","1/6",C("Relevé Reserve"));
-    P("67-1/6b","67","1/6",{});
-    P("69-2/3","69","2/3",{});
-    P("69-1/3","69","1/3",C("Motion Supply"));
-
-    // inside back cover + outside back cover
-    P("72-1","72-1","Full Page",Object.assign({special:true},C("Nova Dance Co.")));
-    P("72-2","72-2","Full Page",Object.assign({special:true,backcover:true},C("Legato Brands")));
-
+  /* ---------- page list: Cover, IFC, 1..N, IBC, Back ---------- */
+  function makePages(n, tplId){
+    tplId=tplId||"full";
+    const mk=(label,kind)=>({id:uid("p"),label,kind,locked:false,notes:"",templateId:tplId,zones:makeZones(tplId)});
+    const pages=[mk("Cover","cover"), mk("IFC","ifc")];
+    for(let i=1;i<=n;i++) pages.push(mk(String(i),"page"));
+    pages.push(mk("IBC","ibc"), mk("Back","back"));
     return pages;
   }
+  const isSpecial=k=>k==="cover"||k==="ifc"||k==="ibc"||k==="back";
 
-  // ---------- layout: how slots group into the printed grid ----------
-  // pg(id) = a normal single-page column
-  // splitRow(cap, ids) = tiles side by side sharing one page number
-  // splitWideStack(cap, wideId, stackIds) = wide tile + a vertical stack of small tiles
-  const pg = id => ({kind:"page", id});
-  const splitRow = (cap, ids) => ({kind:"splitRow", cap, ids});
-  const splitWideStack = (cap, wide, stack) => ({kind:"splitWideStack", cap, wide, stack});
+  /* ---------- seed ---------- */
+  function seed(){
+    const now=Date.now();
+    const cur={id:uid("iss"),title:"Dance Magazine — July/August 2026",orientation:"portrait",singlePages:false,archived:false,createdAt:now,pages:makePages(12)};
+    const byLabel=l=>cur.pages.find(p=>p.label===l);
+    const setTpl=(p,tpl)=>{p.templateId=tpl;p.zones=makeZones(tpl);};
+    const fill=(label,tpl,zoneData)=>{const p=byLabel(label);if(!p)return;if(tpl)setTpl(p,tpl);zoneData.forEach((d,i)=>{if(p.zones[i])Object.assign(p.zones[i],d);});};
+    fill("Cover",null,[{content:"Cover image",category:"final"}]);
+    fill("IFC",null,[{content:"Allegro Dancewear",advert:true,category:"approved"}]);
+    fill("1",null,[{content:"Table of Contents",category:"approved"}]);
+    fill("2",null,[{content:"Pointe Perfect",advert:true,category:"final"}]);
+    fill("3",null,[{content:"Editor's Letter",category:"progress"}]);
+    fill("4",null,[{content:"Center Stage Co.",advert:true,category:"approved"}]);
+    fill("5","tt-third",[{content:"Feature: Summer Intensives",category:"progress"},{content:"Grand Jeté",advert:true,category:"approved"}]);
+    fill("6",null,[{content:"Feature continued",category:"progress"}]);
+    fill("7","half-h",[{content:"Review",category:"progress"},{content:"Motif Dance",advert:true,category:"final"}]);
+    fill("8","tt-sixths",[{content:"Calendar",category:"progress"},{content:"Studio A",advert:true},{content:"Studio B",advert:true}]);
+    fill("9",null,[{content:"Rhythm & Form",advert:true,category:"final"}]);
+    fill("10","half-quarters",[{content:"Classifieds",category:"progress"},{content:"Barre Co.",advert:true},{content:"Turnout",advert:true}]);
+    fill("11",null,[{content:"Feature: Careers",category:"progress"}]);
+    fill("12",null,[{content:"Prima Collective",advert:true,category:"approved"}]);
+    fill("IBC",null,[{content:"Nova Dance Co.",advert:true,category:"final"}]);
+    fill("Back",null,[{content:"Legato Brands",advert:true,category:"final"}]);
 
-  function buildLayout(){
-    const units = [];
-    units.push({type:"single", col:pg("0-1")});
-    units.push({type:"wide",   id:"0-2", caps:["0-2","Page 1"]});
-    // spreads of facing pages 2..72, with splits at 41,43,67,69
-    const rightOf = {
-      "41": splitRow("Page 41", ["41-2/3","41-1/3"]),
-      "43": splitRow("Page 43", ["43-a","43-b"]),
-      "67": splitWideStack("Page 67", "67-2/3", ["67-1/6a","67-1/6b"]),
-      "69": splitRow("Page 69", ["69-2/3","69-1/3"])
-    };
-    for(let left=2; left<=70; left+=2){
-      const right = left+1;
-      const leftCol = pg(String(left));
-      const rightCol = rightOf[String(right)] || pg(String(right));
-      units.push({type:"pair", left:leftCol, right:rightCol});
-    }
-    units.push({type:"pair", left:pg("72"), right:pg("72-1")});
-    units.push({type:"single", col:pg("72-2")});
-    return units;
-  }
-
-  // ---------- state ----------
-  let pages = {};
-  const layout = buildLayout();
-
-  // Defensive storage: cross-origin iframes (e.g. embedded in a HubSpot
-  // dashboard) may block/partition localStorage and THROW on access. Never let
-  // that stop the grid from rendering — degrade to in-memory state instead.
-  function lsGet(k){ try{ return window.localStorage.getItem(k); }catch(e){ return null; } }
-  function lsSet(k,v){ try{ window.localStorage.setItem(k,v); }catch(e){} }
-  function lsRemove(k){ try{ window.localStorage.removeItem(k); }catch(e){} }
-
-  function load(){
-    const raw = lsGet(STORAGE_KEY);
-    if(raw){ try{ pages = JSON.parse(raw); return; }catch(e){} }
-    pages = seed();
-    save();
-  }
-  function save(){ lsSet(STORAGE_KEY, JSON.stringify(pages)); }
-
-  const boardEl = document.getElementById("board");
-  const overlay = document.getElementById("overlay");
-  const panel   = document.getElementById("panel");
-
-  function escapeHtml(s){
-    return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-  }
-
-  // ---- one colored page tile ----
-  function tileBox(id, extraClass){
-    const p = pages[id];
-    const el = document.createElement("div");
-    el.className = "tilebox" + (p.status==="Claimed"?" claimed":"") +
-                   (p.special?" special":"") + (p.backcover?" backcover":"") +
-                   (extraClass?(" "+extraClass):"");
-    el.setAttribute("data-id", id);
-    el.draggable = (p.status==="Claimed");
-    let inner = '<div class="size">'+ escapeHtml(SIZE_LABEL[p.size]||p.size) +'</div>';
-    inner += '<div class="body">';
-    if(p.advertiser) inner += '<span class="adv">'+ escapeHtml(p.advertiser) +'</span>';
-    else if(p.note)  inner += '<span class="note">'+ escapeHtml(p.note) +'</span>';
-    inner += '</div>';
-    el.innerHTML = inner;
-
-    el.addEventListener("click", () => openPanel(id));
-    el.addEventListener("dragstart", e => {
-      e.dataTransfer.setData("text/plain", id);
-      e.dataTransfer.effectAllowed = "move";
-      el.classList.add("dragging");
+    const past={id:uid("iss"),title:"Dance Magazine — May/June 2026",orientation:"portrait",singlePages:false,archived:true,createdAt:now-6e9,pages:makePages(12)};
+    past.pages.filter(p=>p.kind==="page").forEach((p,i)=>{
+      if(i%3===0){p.zones[0].content="Advertiser "+(i+1);p.zones[0].advert=true;p.zones[0].category="final";}
+      else {p.zones[0].content="Editorial";p.zones[0].category="final";}
     });
-    el.addEventListener("dragend", () => el.classList.remove("dragging"));
-    el.addEventListener("dragover", e => { e.preventDefault(); el.classList.add("dragover"); });
-    el.addEventListener("dragleave", () => el.classList.remove("dragover"));
-    el.addEventListener("drop", e => {
-      e.preventDefault();
-      el.classList.remove("dragover");
-      const fromId = e.dataTransfer.getData("text/plain");
-      moveBooking(fromId, id);
+    return {activeIssueId:cur.id, issues:{[cur.id]:cur,[past.id]:past}};
+  }
+
+  /* ---------- state ---------- */
+  let state;
+  function load(){const raw=lsGet(KEY);if(raw){try{const s=JSON.parse(raw);if(s&&s.issues&&s.activeIssueId){state=s;return;}}catch(e){}}state=seed();save();}
+  function save(){lsSet(KEY,JSON.stringify(state));}
+  const activeIssue=()=>state.issues[state.activeIssueId];
+  const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+  const board=document.getElementById("board");
+  const overlay=document.getElementById("overlay");
+  const modal=document.getElementById("modal");
+  const ctxmenu=document.getElementById("ctxmenu");
+
+  /* ---------- paint zones into a positioned host ---------- */
+  function paintZones(host,page,opts){
+    opts=opts||{};
+    const t=tplById(page.templateId);
+    page.zones.forEach((zone,i)=>{
+      const g=t.zones[i]||t.zones[0];
+      const el=document.createElement("div");
+      el.className="zone"+(zone.advert?" advert":"")+(zone.category?" catbar":"");
+      el.style.left=(g.x*100)+"%";el.style.top=(g.y*100)+"%";
+      el.style.width=(g.w*100)+"%";el.style.height=(g.h*100)+"%";
+      if(zone.category){const c=catById(zone.category);if(c)el.style.borderLeftColor=c.color;}
+      if(!zone.advert && zone.content){el.innerHTML='<span class="zt">'+esc(zone.content)+'</span>';}
+      if(opts.selectable){
+        el.dataset.zi=i;
+        if(opts.selectedIndex===i)el.classList.add("sel");
+        el.addEventListener("click",e=>{e.stopPropagation();opts.onSelect(i);});
+      }
+      host.appendChild(el);
     });
+  }
+
+  /* ---------- board render ---------- */
+  function pageTile(page){
+    const el=document.createElement("div");
+    el.className="tile"+(isSpecial(page.kind)?" special":"")+(page.locked?" locked":"");
+    el.dataset.pid=page.id;
+    el.draggable=!page.locked;
+    paintZones(el,page,{});
+    if(page.locked){const l=document.createElement("div");l.className="lockicon";l.textContent="🔒";el.appendChild(l);}
+    const menu=document.createElement("div");menu.className="pagemenu";menu.textContent="⋮";
+    menu.addEventListener("click",e=>{e.stopPropagation();openPageMenu(page.id,e.clientX,e.clientY);});
+    el.appendChild(menu);
+    el.addEventListener("click",()=>{if(!page.locked)openEdit(page.id);});
+    el.addEventListener("dragstart",e=>{e.dataTransfer.setData("text/plain",page.id);e.dataTransfer.effectAllowed="move";el.classList.add("dragging");});
+    el.addEventListener("dragend",()=>el.classList.remove("dragging"));
+    el.addEventListener("dragover",e=>{e.preventDefault();el.classList.add("dragover");});
+    el.addEventListener("dragleave",()=>el.classList.remove("dragover"));
+    el.addEventListener("drop",e=>{e.preventDefault();el.classList.remove("dragover");movePage(e.dataTransfer.getData("text/plain"),page.id);});
     return el;
   }
-
-  // ---- a page column: tile(s) + caption below ----
-  function pageColumn(col){
-    const wrap = document.createElement("div");
-    wrap.className = "page";
-
-    if(col.kind === "page"){
-      wrap.appendChild(tileBox(col.id));
-      wrap.appendChild(caption(pages[col.id].pageNumber));
-
-    } else if(col.kind === "splitRow"){
-      const row = document.createElement("div");
-      row.className = "split-row";
-      col.ids.forEach(id => row.appendChild(tileBox(id, SIZE_FR[pages[id].size])));
-      wrap.appendChild(row);
-      wrap.appendChild(caption(col.cap.replace(/^Page\s*/,"")));
-
-    } else if(col.kind === "splitWideStack"){
-      const row = document.createElement("div");
-      row.className = "split-row";
-      row.appendChild(tileBox(col.wide, SIZE_FR[pages[col.wide].size]));
-      const stack = document.createElement("div");
-      stack.className = "split-col fr-1_3";
-      col.stack.forEach(id => stack.appendChild(tileBox(id)));
-      row.appendChild(stack);
-      wrap.appendChild(row);
-      wrap.appendChild(caption(col.cap.replace(/^Page\s*/,"")));
-    }
-    return wrap;
+  function pageColumn(page){
+    const w=document.createElement("div");w.className="page";
+    w.appendChild(pageTile(page));
+    const cap=document.createElement("div");cap.className="caption";cap.textContent=page.label;
+    w.appendChild(cap);
+    return w;
   }
-
-  function caption(pageNumber, rightNumber){
-    const c = document.createElement("div");
-    c.className = "caption";
-    const left = document.createElement("span");
-    left.textContent = rightNumber ? pageNumber : "";
-    const right = document.createElement("span");
-    right.className = "r";
-    right.textContent = rightNumber ? rightNumber : ("Page "+pageNumber).replace("Page 0","0").replace("Page 72-","72-");
-    // normalize special captions (0-1, 0-2, 72-1, 72-2) which aren't "Page N"
-    if(/[-]/.test(pageNumber) && !rightNumber){ right.textContent = pageNumber; }
-    c.appendChild(left); c.appendChild(right);
-    return c;
-  }
-
   function render(){
-    boardEl.innerHTML = "";
-    layout.forEach(unit => {
-      const spread = document.createElement("div");
-      spread.className = "spread";
-      if(unit.type === "single"){
-        spread.classList.add("single");
-        spread.appendChild(pageColumn(unit.col));
-      } else if(unit.type === "wide"){
-        spread.classList.add("wide");
-        const col = document.createElement("div");
-        col.className = "page";
-        col.appendChild(tileBox(unit.id));
-        col.appendChild(caption(unit.caps[0], unit.caps[1]));
-        spread.appendChild(col);
-      } else { // pair
-        spread.appendChild(pageColumn(unit.left));
-        spread.appendChild(pageColumn(unit.right));
-      }
-      boardEl.appendChild(spread);
+    const iss=activeIssue();
+    const sel=document.getElementById("issueSelect");
+    sel.innerHTML=Object.values(state.issues).sort((a,b)=>b.createdAt-a.createdAt)
+      .map(i=>'<option value="'+i.id+'"'+(i.id===iss.id?" selected":"")+'>'+esc(i.title)+(i.archived?" (archived)":"")+'</option>').join("");
+    document.getElementById("archBadge").style.display=iss.archived?"":"none";
+    document.getElementById("issueTitle").textContent=iss.title;
+
+    board.innerHTML="";
+    layoutUnits(iss).forEach(u=>{
+      const s=document.createElement("div");s.className="spread";
+      u.forEach(p=>s.appendChild(pageColumn(p)));
+      board.appendChild(s);
     });
-    updateStats();
-  }
-
-  // ---- drag: move a booking onto another slot ----
-  // Free target  -> booking moves, origin becomes Free.
-  // Claimed target -> the two bookings swap. Size stays with the physical slot.
-  function moveBooking(fromId, toId){
-    if(!fromId || fromId === toId) return;
-    const a = pages[fromId], b = pages[toId];
-    if(!a || !b || a.status !== "Claimed") return;
-    const aAdv = a.advertiser, aStatus = a.status;
-    a.advertiser = b.advertiser; a.status = b.status;
-    b.advertiser = aAdv;         b.status = aStatus;
-    save(); render();
-  }
-
-  function updateStats(){
-    const all = Object.values(pages);
-    const claimed = all.filter(p => p.status === "Claimed").length;
-    document.getElementById("claimedCount").textContent = claimed;
-    document.getElementById("freeCount").textContent = all.length - claimed;
-    document.getElementById("totalCount").textContent = all.length;
-  }
-
-  // ---- popover ----
-  function openPanel(id){
-    const p = pages[id];
-    overlay.classList.add("show");
-    const heading = /[-]/.test(p.pageNumber) ? p.pageNumber : ("Page " + p.pageNumber);
-    if(p.status === "Free"){
-      panel.innerHTML =
-        '<h3>'+ escapeHtml(heading) +'</h3>' +
-        '<div class="meta">Currently free' + (p.note ? ' · '+escapeHtml(p.note) : '') + '</div>' +
-        '<label>Advertiser</label>' +
-        '<input type="text" id="advInput" placeholder="Company name" autocomplete="off" />' +
-        '<label>Size</label>' +
-        '<select id="sizeInput">' +
-          SIZES.map(s => '<option value="'+s+'"'+(s===p.size?" selected":"")+'>'+escapeHtml(SIZE_LABEL[s])+'</option>').join("") +
-        '</select>' +
-        '<div class="row-btns">' +
-          '<button class="btn-cancel" id="cancelBtn">Cancel</button>' +
-          '<button class="btn-save" id="saveBtn">Claim page</button>' +
-        '</div>';
-      const input = document.getElementById("advInput");
-      const doSave = () => {
-        const adv = input.value.trim();
-        if(!adv){ input.focus(); return; }
-        p.advertiser = adv;
-        p.size = document.getElementById("sizeInput").value;
-        p.status = "Claimed";
-        p.note = "";
-        save(); render(); closePanel();
-      };
-      document.getElementById("saveBtn").addEventListener("click", doSave);
-      input.addEventListener("keydown", e => { if(e.key === "Enter") doSave(); });
-      setTimeout(() => input.focus(), 30);
-    } else {
-      panel.innerHTML =
-        '<h3>'+ escapeHtml(heading) +'</h3>' +
-        '<div class="meta">Claimed by <b>'+ escapeHtml(p.advertiser) +'</b> · '+ escapeHtml(SIZE_LABEL[p.size]||p.size) +'</div>' +
-        '<div class="row-btns">' +
-          '<button class="btn-cancel" id="cancelBtn">Close</button>' +
-          '<button class="btn-free" id="freeBtn">Free this page</button>' +
-        '</div>';
-      document.getElementById("freeBtn").addEventListener("click", () => {
-        p.status = "Free"; p.advertiser = "";
-        save(); render(); closePanel();
-      });
-    }
-    document.getElementById("cancelBtn").addEventListener("click", closePanel);
-  }
-  function closePanel(){ overlay.classList.remove("show"); panel.innerHTML = ""; }
-
-  overlay.addEventListener("click", e => { if(e.target === overlay) closePanel(); });
-  document.addEventListener("keydown", e => { if(e.key === "Escape") closePanel(); });
-
-  document.getElementById("resetBtn").addEventListener("click", () => {
-    lsRemove(STORAGE_KEY);
-    pages = seed();
+    renderStats(iss);
     save();
-    render();
-  });
+  }
+  // pairing: Cover alone, [IFC..IBC] paired 2-by-2, Back alone (single-pages = all standalone)
+  function layoutUnits(iss){
+    if(iss.singlePages) return iss.pages.map(p=>[p]);
+    const units=[],mid=[];
+    iss.pages.forEach(p=>{if(p.kind!=="cover"&&p.kind!=="back")mid.push(p);});
+    const cover=iss.pages.find(p=>p.kind==="cover");
+    const back=iss.pages.find(p=>p.kind==="back");
+    if(cover)units.push([cover]);
+    for(let i=0;i<mid.length;i+=2)units.push(mid.slice(i,i+2));
+    if(back)units.push([back]);
+    return units;
+  }
+  function renderStats(iss){
+    const counts={};let advertPages=0;
+    iss.pages.forEach(p=>{
+      const cats=new Set();let hasAd=false;
+      p.zones.forEach(z=>{if(z.category)cats.add(z.category);if(z.advert)hasAd=true;});
+      cats.forEach(c=>counts[c]=(counts[c]||0)+1);
+      if(hasAd)advertPages++;
+    });
+    document.getElementById("catStats").innerHTML=CATEGORIES.map(c=>
+      '<span class="c"><span class="dotc" style="background:'+c.color+'"></span>'+c.name+' <b>'+(counts[c.id]||0)+'</b></span>'
+    ).join("");
+    document.getElementById("pageStat").innerHTML='<b>'+iss.pages.length+'</b> pages · <b>'+advertPages+'</b> with ads';
+  }
 
-  // ---------- boot ----------
-  // Wrap boot so no single failure can leave a blank grid.
-  try { load(); } catch(e) { pages = seed(); }
+  /* ---------- move / swap ---------- */
+  function movePage(fromId,toId){
+    if(!fromId||fromId===toId)return;
+    const iss=activeIssue();
+    const a=iss.pages.find(p=>p.id===fromId),b=iss.pages.find(p=>p.id===toId);
+    if(!a||!b||a.locked||b.locked)return;
+    const tt=a.templateId,tz=a.zones; a.templateId=b.templateId;a.zones=b.zones; b.templateId=tt;b.zones=tz;
+    render();
+  }
+
+  /* ---------- Edit Page dialog ---------- */
+  let edit={pid:null,tab:"content",zi:0,tplOpen:false};
+  const curPage=()=>activeIssue().pages.find(x=>x.id===edit.pid);
+  function openEdit(pidv){edit={pid:pidv,tab:"content",zi:0,tplOpen:false};renderEdit();showModal();}
+
+  function renderEdit(){
+    const p=curPage();if(!p)return;
+    modal.className="modal";
+    const tabs=["Content","Notes","Tags","Comments"];
+    const title=isSpecial(p.kind)?p.label:"Page "+p.label;
+    let h='<div class="modal-b">';
+    h+='<div style="font-size:17px;font-weight:700;margin-bottom:2px;">Edit '+esc(title)+'<span class="move-link" id="moveLink">↔ Move</span></div>';
+    h+='<div class="tabs">'+tabs.map(t=>{const key=t.toLowerCase();const dis=(key!=="content"&&key!=="notes");
+      return '<div class="tab '+(edit.tab===key?"active":"")+(dis?" disabled":"")+'" data-tab="'+key+'">'+t+'</div>';}).join("")+'</div>';
+
+    if(edit.tab==="notes"){
+      h+='<label class="f">Page notes</label><textarea id="noteArea" placeholder="Production notes for this page…">'+esc(p.notes||"")+'</textarea>';
+      h+='<div class="modal-foot"><button class="btn ghost" data-close>Close</button><button class="btn primary" id="saveNote">Save</button></div></div>';
+      modal.innerHTML=h;wireEditCommon(p);
+      document.getElementById("saveNote").onclick=()=>{p.notes=document.getElementById("noteArea").value;save();closeModal();};
+      return;
+    }
+
+    // CONTENT tab
+    const zone=p.zones[edit.zi]||p.zones[0];
+    h+='<div class="edit-grid"><div class="edit-left"><div class="prev" id="prev"></div>';
+    h+='<div class="change-tpl" id="changeTpl">'+(edit.tplOpen?"▾ ":"")+'CHANGE TEMPLATE</div></div><div class="edit-right">';
+    if(edit.tplOpen){
+      h+=renderTplLib(p.templateId);
+    } else {
+      h+='<div class="zone-meta">Zone '+(edit.zi+1)+' of '+p.zones.length+' · click a zone in the preview to edit it</div>';
+      h+='<label class="chk"><input type="checkbox" id="advertChk" '+(zone.advert?"checked":"")+'> Advert (ad slot — placed separately)</label>';
+      h+='<label class="f">Content ('+esc(zone.label)+')</label>';
+      h+='<input type="text" id="contentInput" value="'+esc(zone.content)+'" placeholder="Headline / advertiser…" '+(zone.advert?"disabled":"")+'>';
+      h+='<label class="f">Category</label><select id="catSel"><option value="">&lt;none&gt;</option>'+
+        CATEGORIES.map(c=>'<option value="'+c.id+'"'+(zone.category===c.id?" selected":"")+'>'+c.name+'</option>').join("")+'</select>';
+    }
+    h+='</div></div>';
+    h+='<div class="modal-foot"><button class="btn ghost" data-close>Close</button><button class="btn primary" id="saveEdit">Save</button></div></div>';
+    modal.innerHTML=h;
+
+    const repaint=()=>{const pv=document.getElementById("prev");pv.innerHTML="";
+      paintZones(pv,p,{selectable:true,selectedIndex:edit.zi,onSelect:i=>{persistZoneInputs(p);edit.zi=i;edit.tplOpen=false;renderEdit();}});};
+    repaint();
+    document.getElementById("changeTpl").onclick=()=>{persistZoneInputs(p);edit.tplOpen=!edit.tplOpen;renderEdit();};
+    if(edit.tplOpen){wireTplLib(p);}
+    else{
+      const ci=document.getElementById("contentInput");
+      ci.addEventListener("input",()=>{zone.content=ci.value;repaint();});
+      document.getElementById("advertChk").onchange=e=>{zone.advert=e.target.checked;if(zone.advert)zone.content="";renderEdit();};
+      document.getElementById("catSel").onchange=e=>{zone.category=e.target.value;repaint();};
+    }
+    wireEditCommon(p);
+    document.getElementById("saveEdit").onclick=()=>{persistZoneInputs(p);save();render();closeModal();};
+  }
+  function persistZoneInputs(p){
+    const zone=p.zones[edit.zi];if(!zone)return;
+    const ci=document.getElementById("contentInput");const cs=document.getElementById("catSel");
+    if(ci&&!zone.advert)zone.content=ci.value;
+    if(cs)zone.category=cs.value;
+  }
+  function wireEditCommon(p){
+    modal.querySelectorAll(".tab:not(.disabled)").forEach(t=>t.onclick=()=>{persistZoneInputs(p);edit.tab=t.dataset.tab;edit.tplOpen=false;renderEdit();});
+    const ml=document.getElementById("moveLink");if(ml)ml.onclick=()=>openMove(p);
+    modal.querySelectorAll("[data-close]").forEach(b=>b.onclick=closeModal);
+  }
+
+  function renderTplLib(curId){
+    const groups={};TEMPLATES.forEach(t=>{(groups[t.group]=groups[t.group]||[]).push(t);});
+    let h='<div class="zone-meta">Pick a layout — replaces this page\'s zone structure</div><div class="tpl-lib">';
+    Object.keys(groups).forEach(g=>{
+      h+='<div class="tpl-row"><h4>'+esc(g)+'</h4><div class="tpl-thumbs">';
+      groups[g].forEach(t=>{h+='<div><div class="tpl-thumb'+(t.id===curId?" cur":"")+'" data-tpl="'+t.id+'" id="tt_'+t.id+'"></div><div class="tpl-name">'+esc(t.name)+'</div></div>';});
+      h+='</div></div>';
+    });
+    return h+'</div>';
+  }
+  function wireTplLib(p){
+    TEMPLATES.forEach(t=>{
+      const host=document.getElementById("tt_"+t.id);if(!host)return;
+      t.zones.forEach(g=>{const el=document.createElement("div");el.className="zone";
+        el.style.left=(g.x*100)+"%";el.style.top=(g.y*100)+"%";el.style.width=(g.w*100)+"%";el.style.height=(g.h*100)+"%";host.appendChild(el);});
+      host.onclick=()=>{p.zones=makeZones(t.id,p.zones);p.templateId=t.id;edit.zi=0;edit.tplOpen=false;renderEdit();};
+    });
+  }
+
+  function openMove(p){
+    const iss=activeIssue();
+    const opts=iss.pages.filter(x=>x.id!==p.id&&!x.locked).map(x=>'<option value="'+x.id+'">'+esc(x.label)+'</option>').join("");
+    modal.className="modal sm";
+    modal.innerHTML='<div class="modal-b"><div style="font-size:16px;font-weight:700;margin-bottom:6px;">Move / swap '+esc(p.label)+'</div>'
+      +'<label class="f">Swap content with page</label><select id="swapSel">'+opts+'</select>'
+      +'<div class="modal-foot"><button class="btn ghost" data-close>Cancel</button><button class="btn primary" id="doSwap">Swap</button></div></div>';
+    modal.querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>openEdit(p.id));
+    document.getElementById("doSwap").onclick=()=>{movePage(p.id,document.getElementById("swapSel").value);closeModal();};
+  }
+
+  /* ---------- page ⋮ menu ---------- */
+  function openPageMenu(pidv,x,y){
+    const iss=activeIssue();const p=iss.pages.find(z=>z.id===pidv);if(!p)return;
+    const items=[
+      {t:"Insert pages after",f:()=>insertPages(pidv)},
+      {t:"Copy content across next…",f:()=>copyAcross(pidv)},
+      {t:p.locked?"Unlock":"Lock",f:()=>{p.locked=!p.locked;save();render();}},
+      {sep:1},
+      {t:"Delete page",danger:1,f:()=>{if(isSpecial(p.kind)){alert("Cover / IFC / IBC / Back can't be deleted.");return;}iss.pages=iss.pages.filter(z=>z.id!==pidv);renumber(iss);save();render();}}
+    ];
+    ctxmenu.innerHTML=items.map((it,i)=>it.sep?'<div class="sep"></div>':'<div class="mi'+(it.danger?" danger":"")+'" data-i="'+i+'">'+it.t+'</div>').join("");
+    ctxmenu.style.left=Math.min(x,window.innerWidth-200)+"px";ctxmenu.style.top=y+"px";ctxmenu.classList.add("show");
+    ctxmenu.querySelectorAll(".mi").forEach(m=>m.onclick=()=>{ctxmenu.classList.remove("show");items[+m.dataset.i].f();});
+  }
+  function renumber(iss){let n=1;iss.pages.forEach(p=>{if(p.kind==="page")p.label=String(n++);});}
+  function addBlank(){return {id:uid("p"),label:"?",kind:"page",locked:false,notes:"",templateId:"full",zones:makeZones("full")};}
+  function insertPages(afterId){
+    const iss=activeIssue();const idx=iss.pages.findIndex(p=>p.id===afterId);
+    const n=parseInt(prompt("How many pages?","1"),10);if(!n||n<1)return;
+    const add=[];for(let i=0;i<n;i++)add.push(addBlank());
+    iss.pages.splice(idx+1,0,...add);renumber(iss);save();render();
+  }
+  function copyAcross(srcId){
+    const iss=activeIssue();const idx=iss.pages.findIndex(p=>p.id===srcId);const src=iss.pages[idx];
+    const n=parseInt(prompt("Copy this page's content across how many following pages?","1"),10);if(!n||n<1)return;
+    for(let i=1;i<=n;i++){const t=iss.pages[idx+i];if(!t||t.locked)break;t.templateId=src.templateId;t.zones=makeZones(src.templateId,src.zones);}
+    save();render();
+  }
+
+  /* ---------- add pages (toolbar) ---------- */
+  document.getElementById("addPagesBtn").onclick=()=>{
+    const iss=activeIssue();
+    const n=parseInt(prompt("How many pages to add (before the inside back cover)?","2"),10);if(!n||n<1)return;
+    const ibcIdx=iss.pages.findIndex(p=>p.kind==="ibc");const at=ibcIdx>=0?ibcIdx:iss.pages.length;
+    const add=[];for(let i=0;i<n;i++)add.push(addBlank());
+    iss.pages.splice(at,0,...add);renumber(iss);save();render();
+  };
+
+  /* ---------- New flatplan ---------- */
+  document.getElementById("newIssueBtn").onclick=openNew;
+  function openNew(){
+    modal.className="modal";
+    const cloneName=esc(activeIssue().title);
+    modal.innerHTML='<div class="modal-b"><div style="font-size:17px;font-weight:700;margin-bottom:10px;">Create new flatplan</div>'
+      +'<label class="f">Issue</label><input type="text" id="niTitle" placeholder="e.g. Dance Magazine — September 2026">'
+      +'<label class="chk" style="margin-top:12px;"><input type="checkbox" id="niSingle"> Single pages (no spreads)</label>'
+      +'<label class="f">Orientation</label><div class="radios row"><label><input type="radio" name="ori" value="portrait" checked>Portrait</label>'
+        +'<label><input type="radio" name="ori" value="landscape">Landscape</label><label><input type="radio" name="ori" value="square">Square</label></div>'
+      +'<label class="f">Would you like to clone “'+cloneName+'”?</label>'
+      +'<div class="radios"><label><input type="radio" name="clone" value="empty" checked>No, just create an empty flatplan</label>'
+        +'<label><input type="radio" name="clone" value="layout">Yes, only the layout</label>'
+        +'<label><input type="radio" name="clone" value="all">Yes, the layout and all the content</label></div>'
+      +'<div id="emptyPagesWrap"><label class="f">Content pages (empty flatplan)</label><input type="text" id="niPages" value="12"></div>'
+      +'<div class="modal-foot"><button class="btn ghost" data-close>Cancel</button><button class="btn primary" id="createIssue">Create</button></div></div>';
+    modal.querySelectorAll("[data-close]").forEach(b=>b.onclick=closeModal);
+    const toggleEmpty=()=>{const v=modal.querySelector('input[name=clone]:checked').value;document.getElementById("emptyPagesWrap").style.display=v==="empty"?"":"none";};
+    modal.querySelectorAll('input[name=clone]').forEach(r=>r.onchange=toggleEmpty);toggleEmpty();
+    showModal();
+    document.getElementById("createIssue").onclick=()=>{
+      const title=document.getElementById("niTitle").value.trim()||"Untitled issue";
+      const single=document.getElementById("niSingle").checked;
+      const ori=modal.querySelector('input[name=ori]:checked').value;
+      const clone=modal.querySelector('input[name=clone]:checked').value;
+      const src=activeIssue();
+      let pages;
+      if(clone==="empty"){pages=makePages(parseInt(document.getElementById("niPages").value,10)||0);}
+      else if(clone==="layout"){pages=src.pages.map(p=>({id:uid("p"),label:p.label,kind:p.kind,locked:false,notes:"",templateId:p.templateId,zones:makeZones(p.templateId)}));}
+      else{pages=src.pages.map(p=>({id:uid("p"),label:p.label,kind:p.kind,locked:false,notes:p.notes||"",templateId:p.templateId,zones:makeZones(p.templateId,p.zones)}));}
+      const iss={id:uid("iss"),title,orientation:ori,singlePages:single,archived:false,createdAt:Date.now(),pages};
+      state.issues[iss.id]=iss;state.activeIssueId=iss.id;save();closeModal();render();
+    };
+  }
+
+  /* ---------- Manage issues (history / archive) ---------- */
+  document.getElementById("manageBtn").onclick=openManage;
+  function openManage(){
+    modal.className="modal";
+    const rows=Object.values(state.issues).sort((a,b)=>b.createdAt-a.createdAt).map(i=>{
+      const ads=i.pages.filter(p=>p.zones.some(z=>z.advert)).length;
+      return '<tr style="border-bottom:1px solid var(--line2)"><td style="padding:8px 6px;">'+esc(i.title)+(i.archived?' <span class="badge-arch">Archived</span>':'')
+        +'</td><td style="padding:8px 6px;color:#555;white-space:nowrap;">'+i.pages.length+' pp · '+ads+' ads</td>'
+        +'<td style="padding:8px 6px;text-align:right;white-space:nowrap;">'
+        +'<button class="tbtn" data-open="'+i.id+'">Open</button> '
+        +'<button class="tbtn" data-arch="'+i.id+'">'+(i.archived?"Unarchive":"Archive")+'</button></td></tr>';
+    }).join("");
+    modal.innerHTML='<div class="modal-b"><div style="font-size:17px;font-weight:700;margin-bottom:4px;">Issues</div>'
+      +'<div class="zone-meta">All flatplans, including archived. Archived issues stay retrievable for history.</div>'
+      +'<table style="width:100%;border-collapse:collapse;font-size:13px;"><tbody>'+rows+'</tbody></table>'
+      +'<div class="modal-foot"><button class="btn ghost" id="resetDemo">Reset demo data</button><span class="spacer"></span><button class="btn ghost" data-close>Close</button></div></div>';
+    modal.querySelectorAll("[data-close]").forEach(b=>b.onclick=closeModal);
+    document.getElementById("resetDemo").onclick=()=>{if(confirm("Reset all issues back to the original demo data?")){state=seed();save();closeModal();render();}};
+    modal.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>{state.activeIssueId=b.dataset.open;save();closeModal();render();});
+    modal.querySelectorAll("[data-arch]").forEach(b=>b.onclick=()=>{const i=state.issues[b.dataset.arch];i.archived=!i.archived;
+      if(i.archived&&i.id===state.activeIssueId){const other=Object.values(state.issues).find(x=>!x.archived);if(other)state.activeIssueId=other.id;}
+      save();openManage();render();});
+    showModal();
+  }
+
+  /* ---------- misc wiring ---------- */
+  document.getElementById("issueSelect").onchange=e=>{state.activeIssueId=e.target.value;save();render();};
+  function showModal(){overlay.classList.add("show");}
+  function closeModal(){overlay.classList.remove("show");modal.innerHTML="";}
+  overlay.addEventListener("click",e=>{if(e.target===overlay)closeModal();});
+  document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeModal();ctxmenu.classList.remove("show");}});
+  document.addEventListener("click",e=>{if(!ctxmenu.contains(e.target))ctxmenu.classList.remove("show");});
+
+  /* ---------- boot ---------- */
+  try{load();}catch(e){state=seed();}
   render();
+  window.__flatplan={state:()=>state,activeIssue,render};
 })();
 </script>
 </body>
