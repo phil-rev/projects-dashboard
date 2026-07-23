@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Magazine Flat Plan</title>
+<style>
+  :root{
+    --ink:#1a1a1a;
+    --muted:#6a6a6a;
+    --paper:#ffffff;
+    --line:#c7c7c7;
+    --free:#ffffff;
+    --claimed:#49c5cb;          /* teal - a claimed/sold page */
+    --claimed-text:#0d3d40;
+    --special-border:#e8998a;   /* salmon - cover/special positions */
+    --backcover:#ffe100;        /* yellow accent - outside back cover */
+    --dragover:#1f8f95;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0;padding:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{ padding:18px 22px 48px; }
+
+  header{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:14px;
+    margin-bottom:14px;
+  }
+  header h1{
+    font-size:22px;
+    font-weight:700;
+    margin:0;
+    color:#000;
+    letter-spacing:-0.01em;
+  }
+  .legend{
+    display:flex;
+    gap:16px;
+    align-items:center;
+    font-size:12px;
+    color:#333;
+    flex-wrap:wrap;
+  }
+  .legend .item{display:flex;align-items:center;gap:6px;}
+  .swatch{
+    width:14px;height:14px;border-radius:2px;
+    border:1px solid rgba(0,0,0,0.2);
+    display:inline-block;
+  }
+  .swatch.special{background:#fff;border:2px solid var(--special-border);}
+
+  .toolbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:18px;
+    gap:12px;
+    flex-wrap:wrap;
+    border-top:1px solid #ececec;
+    border-bottom:1px solid #ececec;
+    padding:8px 0;
+  }
+  .stat{ font-size:13px; color:#333; }
+  .stat b{ color:#000; font-weight:700; }
+  .stat .dot{ color:#c7c7c7; margin:0 8px; }
+  button.reset{
+    font-size:12px;
+    background:#fff;
+    border:1px solid var(--line);
+    color:#444;
+    padding:7px 12px;
+    border-radius:6px;
+    cursor:pointer;
+  }
+  button.reset:hover{ border-color:#999; color:#000; }
+
+  /* --- board: a wrapping contact-sheet grid of spreads --- */
+  .board{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:flex-start;
+    gap:14px 12px;
+  }
+  .spread{ display:flex; gap:0; }
+  .spread.single{ }              /* one page wide */
+  .page{
+    display:flex;
+    flex-direction:column;
+    width:76px;                  /* one printed page */
+  }
+  .spread.wide .page{ width:152px; } /* a spread booked as one 2-page unit */
+
+  .tilebox{
+    position:relative;
+    background:var(--free);
+    border:1.5px solid var(--line);
+    height:92px;
+    padding:5px 6px;
+    cursor:pointer;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    transition:box-shadow .1s ease, transform .1s ease;
+    user-select:none;
+  }
+  .tilebox:hover{ box-shadow:0 2px 10px rgba(0,0,0,0.18); transform:translateY(-1px); z-index:2; }
+  .tilebox .size{
+    font-size:10px;
+    font-weight:700;
+    color:inherit;
+    line-height:1.1;
+  }
+  .tilebox .body{
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+  }
+  .tilebox .adv{
+    font-size:9.5px;
+    font-weight:600;
+    line-height:1.15;
+    overflow-wrap:break-word;
+    word-break:normal;
+    hyphens:none;
+    max-width:100%;
+  }
+  .tilebox .note{ font-size:9.5px; color:var(--muted); font-weight:600; }
+
+  .tilebox.claimed{ background:var(--claimed); color:var(--claimed-text); border-color:#37b0b6; }
+  .tilebox.special{ border:2px solid var(--special-border); }
+  .tilebox.backcover{ background:var(--backcover); color:#3a3300; border-color:var(--special-border); }
+
+  .tilebox.dragging{ opacity:.35; }
+  .tilebox.dragover{ outline:2px dashed var(--dragover); outline-offset:-2px; box-shadow:0 0 0 2px rgba(31,143,149,.25); }
+
+  /* caption BELOW the tile, outside the border */
+  .caption{
+    display:flex;
+    justify-content:space-between;
+    font-size:11px;
+    color:#222;
+    padding:3px 1px 0;
+    min-height:16px;
+  }
+  .caption .r{ margin-left:auto; }
+
+  /* split page slots */
+  .split-row{ display:flex; height:92px; }
+  .split-row .tilebox{ height:100%; }
+  .split-col{ display:flex; flex-direction:column; }
+  .split-col .tilebox{ height:50%; }
+  /* proportional widths inside a split */
+  .fr-2_3{ flex:2 1 0; } .fr-1_3{ flex:1 1 0; } .fr-1_2{ flex:1 1 0; } .fr-1_6{ flex:1 1 0; }
+
+  /* --- popover --- */
+  .overlay{
+    position:fixed; inset:0;
+    background:rgba(20,20,20,.4);
+    display:none; align-items:center; justify-content:center;
+    z-index:50; padding:16px;
+  }
+  .overlay.show{ display:flex; }
+  .panel{
+    background:#fff;
+    border-radius:10px;
+    box-shadow:0 16px 44px rgba(0,0,0,.3);
+    padding:20px 20px 18px;
+    width:280px;
+    max-width:100%;
+    font-size:14px;
+  }
+  .panel h3{ margin:0 0 3px; font-size:16px; font-weight:700; }
+  .panel .meta{ font-size:12px; color:var(--muted); margin-bottom:14px; }
+  .panel label{
+    display:block; font-size:11px; text-transform:uppercase; letter-spacing:.05em;
+    color:var(--muted); margin:12px 0 5px;
+  }
+  .panel input[type=text], .panel select{
+    width:100%; padding:9px 9px; border:1px solid var(--line); border-radius:6px;
+    font-size:14px; font-family:inherit; background:#fff;
+  }
+  .panel .row-btns{ display:flex; gap:8px; margin-top:18px; align-items:center; }
+  .panel button{
+    padding:9px 12px; border-radius:6px; border:none; font-size:13px; font-weight:600; cursor:pointer;
+  }
+  .btn-save{ flex:1; background:#1f8f95; color:#fff; }
+  .btn-save:hover{ background:#187478; }
+  .btn-free{ flex:1; background:#fbeae6; color:#c0442c; }
+  .btn-free:hover{ background:#f6d8d1; }
+  .btn-cancel{ background:none; color:var(--muted); }
+  .btn-cancel:hover{ color:#000; }
+  .hint{ font-size:12px; color:var(--muted); margin-top:20px; line-height:1.5; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Dance Magazine July/August 2026 Flat Plan</h1>
+    <div class="legend">
+      <span class="item"><span class="swatch" style="background:var(--free)"></span>Free</span>
+      <span class="item"><span class="swatch" style="background:var(--claimed)"></span>Claimed</span>
+      <span class="item"><span class="swatch special"></span>Cover / special</span>
+      <span class="item"><span class="swatch" style="background:var(--backcover)"></span>Outside back cover</span>
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <div class="stat"><b id="claimedCount">0</b> claimed<span class="dot">·</span><b id="freeCount">0</b> free<span class="dot">·</span><b id="totalCount">0</b> page slots</div>
+    <button class="reset" id="resetBtn">Reset demo data</button>
+  </div>
+
+  <div class="board" id="board"></div>
+
+  <div class="hint">Click a free page to claim it for an advertiser · click a claimed page to release it · drag any claimed page onto another page to move or swap the booking.</div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="panel" id="panel"></div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  const STORAGE_KEY = "flatplan_dance_v2";
+  const SIZES = ["Full Page","2-Page Spread","2/3","1/2","1/3","1/6"];
+  const SIZE_LABEL = {
+    "Full Page":"Full Page","2-Page Spread":"2 Page Spread",
+    "2/3":"2/3 Page","1/2":"1/2","1/3":"1/3","1/6":"1/6"
+  };
+  const SIZE_FR = {"2/3":"fr-2_3","1/3":"fr-1_3","1/2":"fr-1_2","1/6":"fr-1_6"};
+
+  // ---------- seed data (mirrors the reference flat plan) ----------
+  function seed(){
+    const pages = {};
+    const P = (id, pageNumber, size, opts) => {
+      opts = opts || {};
+      pages[id] = {
+        id, pageNumber, size,
+        status: opts.status || "Free",
+        advertiser: opts.advertiser || "",
+        note: opts.note || "",
+        special: !!opts.special,
+        backcover: !!opts.backcover
+      };
+    };
+    const C = (adv) => ({status:"Claimed", advertiser:adv});
+
+    // covers / specials
+    P("0-1","0-1","Full Page",{special:true, note:"Cover"});
+    P("0-2","0-2","2-Page Spread",Object.assign({special:true},C("Allegro Dancewear")));
+
+    // regular run, pages 1..72 default to a free Full Page
+    for(let n=1;n<=72;n++) P(String(n), String(n), "Full Page", {});
+    // page 1 is absorbed into the inside-front-cover 2-page spread (0-2), not a separate slot
+    delete pages["1"];
+
+    // editorial
+    pages["3"].note = "TOC";
+    pages["4"].note = "TOC";
+
+    // pre-sold full pages
+    Object.assign(pages["2"],  C("Pointe Perfect"));
+    Object.assign(pages["5"],  C("Studio Pro Academy"));
+    Object.assign(pages["7"],  C("Center Stage Co."));
+    Object.assign(pages["9"],  C("Pirouette Apparel"));
+    Object.assign(pages["11"], C("Grand Jeté Footwear"));
+    Object.assign(pages["17"], C("Motif Dance"));
+    Object.assign(pages["33"], C("Rhythm & Form"));
+    Object.assign(pages["39"], C("Encore Studios"));
+    Object.assign(pages["49"], C("Prima Collective"));
+    Object.assign(pages["51"], C("Barre Method Co."));
+    Object.assign(pages["65"], C("Turnout Textiles"));
+    Object.assign(pages["71"], C("City Dance Center"));
+
+    // splits — replace those single full pages with sub-tiles
+    delete pages["41"]; delete pages["43"]; delete pages["67"]; delete pages["69"];
+    P("41-2/3","41","2/3",{});
+    P("41-1/3","41","1/3",C("Adagio Media"));
+    P("43-a","43","1/2",{});
+    P("43-b","43","1/2",C("Tempo Athletics"));
+    P("67-2/3","67","2/3",{});
+    P("67-1/6a","67","1/6",C("Relevé Reserve"));
+    P("67-1/6b","67","1/6",{});
+    P("69-2/3","69","2/3",{});
+    P("69-1/3","69","1/3",C("Motion Supply"));
+
+    // inside back cover + outside back cover
+    P("72-1","72-1","Full Page",Object.assign({special:true},C("Nova Dance Co.")));
+    P("72-2","72-2","Full Page",Object.assign({special:true,backcover:true},C("Legato Brands")));
+
+    return pages;
+  }
+
+  // ---------- layout: how slots group into the printed grid ----------
+  // pg(id) = a normal single-page column
+  // splitRow(cap, ids) = tiles side by side sharing one page number
+  // splitWideStack(cap, wideId, stackIds) = wide tile + a vertical stack of small tiles
+  const pg = id => ({kind:"page", id});
+  const splitRow = (cap, ids) => ({kind:"splitRow", cap, ids});
+  const splitWideStack = (cap, wide, stack) => ({kind:"splitWideStack", cap, wide, stack});
+
+  function buildLayout(){
+    const units = [];
+    units.push({type:"single", col:pg("0-1")});
+    units.push({type:"wide",   id:"0-2", caps:["0-2","Page 1"]});
+    // spreads of facing pages 2..72, with splits at 41,43,67,69
+    const rightOf = {
+      "41": splitRow("Page 41", ["41-2/3","41-1/3"]),
+      "43": splitRow("Page 43", ["43-a","43-b"]),
+      "67": splitWideStack("Page 67", "67-2/3", ["67-1/6a","67-1/6b"]),
+      "69": splitRow("Page 69", ["69-2/3","69-1/3"])
+    };
+    for(let left=2; left<=70; left+=2){
+      const right = left+1;
+      const leftCol = pg(String(left));
+      const rightCol = rightOf[String(right)] || pg(String(right));
+      units.push({type:"pair", left:leftCol, right:rightCol});
+    }
+    units.push({type:"pair", left:pg("72"), right:pg("72-1")});
+    units.push({type:"single", col:pg("72-2")});
+    return units;
+  }
+
+  // ---------- state ----------
+  let pages = {};
+  const layout = buildLayout();
+
+  // Defensive storage: cross-origin iframes (e.g. embedded in a HubSpot
+  // dashboard) may block/partition localStorage and THROW on access. Never let
+  // that stop the grid from rendering — degrade to in-memory state instead.
+  function lsGet(k){ try{ return window.localStorage.getItem(k); }catch(e){ return null; } }
+  function lsSet(k,v){ try{ window.localStorage.setItem(k,v); }catch(e){} }
+  function lsRemove(k){ try{ window.localStorage.removeItem(k); }catch(e){} }
+
+  function load(){
+    const raw = lsGet(STORAGE_KEY);
+    if(raw){ try{ pages = JSON.parse(raw); return; }catch(e){} }
+    pages = seed();
+    save();
+  }
+  function save(){ lsSet(STORAGE_KEY, JSON.stringify(pages)); }
+
+  const boardEl = document.getElementById("board");
+  const overlay = document.getElementById("overlay");
+  const panel   = document.getElementById("panel");
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  }
+
+  // ---- one colored page tile ----
+  function tileBox(id, extraClass){
+    const p = pages[id];
+    const el = document.createElement("div");
+    el.className = "tilebox" + (p.status==="Claimed"?" claimed":"") +
+                   (p.special?" special":"") + (p.backcover?" backcover":"") +
+                   (extraClass?(" "+extraClass):"");
+    el.setAttribute("data-id", id);
+    el.draggable = (p.status==="Claimed");
+    let inner = '<div class="size">'+ escapeHtml(SIZE_LABEL[p.size]||p.size) +'</div>';
+    inner += '<div class="body">';
+    if(p.advertiser) inner += '<span class="adv">'+ escapeHtml(p.advertiser) +'</span>';
+    else if(p.note)  inner += '<span class="note">'+ escapeHtml(p.note) +'</span>';
+    inner += '</div>';
+    el.innerHTML = inner;
+
+    el.addEventListener("click", () => openPanel(id));
+    el.addEventListener("dragstart", e => {
+      e.dataTransfer.setData("text/plain", id);
+      e.dataTransfer.effectAllowed = "move";
+      el.classList.add("dragging");
+    });
+    el.addEventListener("dragend", () => el.classList.remove("dragging"));
+    el.addEventListener("dragover", e => { e.preventDefault(); el.classList.add("dragover"); });
+    el.addEventListener("dragleave", () => el.classList.remove("dragover"));
+    el.addEventListener("drop", e => {
+      e.preventDefault();
+      el.classList.remove("dragover");
+      const fromId = e.dataTransfer.getData("text/plain");
+      moveBooking(fromId, id);
+    });
+    return el;
+  }
+
+  // ---- a page column: tile(s) + caption below ----
+  function pageColumn(col){
+    const wrap = document.createElement("div");
+    wrap.className = "page";
+
+    if(col.kind === "page"){
+      wrap.appendChild(tileBox(col.id));
+      wrap.appendChild(caption(pages[col.id].pageNumber));
+
+    } else if(col.kind === "splitRow"){
+      const row = document.createElement("div");
+      row.className = "split-row";
+      col.ids.forEach(id => row.appendChild(tileBox(id, SIZE_FR[pages[id].size])));
+      wrap.appendChild(row);
+      wrap.appendChild(caption(col.cap.replace(/^Page\s*/,"")));
+
+    } else if(col.kind === "splitWideStack"){
+      const row = document.createElement("div");
+      row.className = "split-row";
+      row.appendChild(tileBox(col.wide, SIZE_FR[pages[col.wide].size]));
+      const stack = document.createElement("div");
+      stack.className = "split-col fr-1_3";
+      col.stack.forEach(id => stack.appendChild(tileBox(id)));
+      row.appendChild(stack);
+      wrap.appendChild(row);
+      wrap.appendChild(caption(col.cap.replace(/^Page\s*/,"")));
+    }
+    return wrap;
+  }
+
+  function caption(pageNumber, rightNumber){
+    const c = document.createElement("div");
+    c.className = "caption";
+    const left = document.createElement("span");
+    left.textContent = rightNumber ? pageNumber : "";
+    const right = document.createElement("span");
+    right.className = "r";
+    right.textContent = rightNumber ? rightNumber : ("Page "+pageNumber).replace("Page 0","0").replace("Page 72-","72-");
+    // normalize special captions (0-1, 0-2, 72-1, 72-2) which aren't "Page N"
+    if(/[-]/.test(pageNumber) && !rightNumber){ right.textContent = pageNumber; }
+    c.appendChild(left); c.appendChild(right);
+    return c;
+  }
+
+  function render(){
+    boardEl.innerHTML = "";
+    layout.forEach(unit => {
+      const spread = document.createElement("div");
+      spread.className = "spread";
+      if(unit.type === "single"){
+        spread.classList.add("single");
+        spread.appendChild(pageColumn(unit.col));
+      } else if(unit.type === "wide"){
+        spread.classList.add("wide");
+        const col = document.createElement("div");
+        col.className = "page";
+        col.appendChild(tileBox(unit.id));
+        col.appendChild(caption(unit.caps[0], unit.caps[1]));
+        spread.appendChild(col);
+      } else { // pair
+        spread.appendChild(pageColumn(unit.left));
+        spread.appendChild(pageColumn(unit.right));
+      }
+      boardEl.appendChild(spread);
+    });
+    updateStats();
+  }
+
+  // ---- drag: move a booking onto another slot ----
+  // Free target  -> booking moves, origin becomes Free.
+  // Claimed target -> the two bookings swap. Size stays with the physical slot.
+  function moveBooking(fromId, toId){
+    if(!fromId || fromId === toId) return;
+    const a = pages[fromId], b = pages[toId];
+    if(!a || !b || a.status !== "Claimed") return;
+    const aAdv = a.advertiser, aStatus = a.status;
+    a.advertiser = b.advertiser; a.status = b.status;
+    b.advertiser = aAdv;         b.status = aStatus;
+    save(); render();
+  }
+
+  function updateStats(){
+    const all = Object.values(pages);
+    const claimed = all.filter(p => p.status === "Claimed").length;
+    document.getElementById("claimedCount").textContent = claimed;
+    document.getElementById("freeCount").textContent = all.length - claimed;
+    document.getElementById("totalCount").textContent = all.length;
+  }
+
+  // ---- popover ----
+  function openPanel(id){
+    const p = pages[id];
+    overlay.classList.add("show");
+    const heading = /[-]/.test(p.pageNumber) ? p.pageNumber : ("Page " + p.pageNumber);
+    if(p.status === "Free"){
+      panel.innerHTML =
+        '<h3>'+ escapeHtml(heading) +'</h3>' +
+        '<div class="meta">Currently free' + (p.note ? ' · '+escapeHtml(p.note) : '') + '</div>' +
+        '<label>Advertiser</label>' +
+        '<input type="text" id="advInput" placeholder="Company name" autocomplete="off" />' +
+        '<label>Size</label>' +
+        '<select id="sizeInput">' +
+          SIZES.map(s => '<option value="'+s+'"'+(s===p.size?" selected":"")+'>'+escapeHtml(SIZE_LABEL[s])+'</option>').join("") +
+        '</select>' +
+        '<div class="row-btns">' +
+          '<button class="btn-cancel" id="cancelBtn">Cancel</button>' +
+          '<button class="btn-save" id="saveBtn">Claim page</button>' +
+        '</div>';
+      const input = document.getElementById("advInput");
+      const doSave = () => {
+        const adv = input.value.trim();
+        if(!adv){ input.focus(); return; }
+        p.advertiser = adv;
+        p.size = document.getElementById("sizeInput").value;
+        p.status = "Claimed";
+        p.note = "";
+        save(); render(); closePanel();
+      };
+      document.getElementById("saveBtn").addEventListener("click", doSave);
+      input.addEventListener("keydown", e => { if(e.key === "Enter") doSave(); });
+      setTimeout(() => input.focus(), 30);
+    } else {
+      panel.innerHTML =
+        '<h3>'+ escapeHtml(heading) +'</h3>' +
+        '<div class="meta">Claimed by <b>'+ escapeHtml(p.advertiser) +'</b> · '+ escapeHtml(SIZE_LABEL[p.size]||p.size) +'</div>' +
+        '<div class="row-btns">' +
+          '<button class="btn-cancel" id="cancelBtn">Close</button>' +
+          '<button class="btn-free" id="freeBtn">Free this page</button>' +
+        '</div>';
+      document.getElementById("freeBtn").addEventListener("click", () => {
+        p.status = "Free"; p.advertiser = "";
+        save(); render(); closePanel();
+      });
+    }
+    document.getElementById("cancelBtn").addEventListener("click", closePanel);
+  }
+  function closePanel(){ overlay.classList.remove("show"); panel.innerHTML = ""; }
+
+  overlay.addEventListener("click", e => { if(e.target === overlay) closePanel(); });
+  document.addEventListener("keydown", e => { if(e.key === "Escape") closePanel(); });
+
+  document.getElementById("resetBtn").addEventListener("click", () => {
+    lsRemove(STORAGE_KEY);
+    pages = seed();
+    save();
+    render();
+  });
+
+  // ---------- boot ----------
+  // Wrap boot so no single failure can leave a blank grid.
+  try { load(); } catch(e) { pages = seed(); }
+  render();
+})();
+</script>
+</body>
+</html>
