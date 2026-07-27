@@ -4,8 +4,8 @@ status: active
 goal: Blinkplan-style magazine flat-plan editor embedded in a HubSpot dashboard for a prospect demo — per-page layout templates, per-zone content, multi-issue history, all in one self-contained iframe-safe HTML file.
 category: sales-demo
 started: 2026-07-23
-last_edited: 2026-07-23
-last_action: Shipped v3 (full template library, Sections calculator, Ads-to-be-Placed pool, editable Categories, display settings, PDF) and fixed native-dialog buttons that were dead inside cross-origin iframes. Live on GitHub Pages.
+last_edited: 2026-07-27
+last_action: Added the tool to the projects dashboard as its own card (metadata-only entry; app stays at repo root). Session close-out — v3 live and demo-ready, all controls verified inside a cross-origin iframe.
 github_url: https://phil-rev.github.io/projects-dashboard/flat-planner/
 next_steps:
   - Add an "open in new tab to print" fallback (window.print() may be blocked in HubSpot's sandboxed iframe)
