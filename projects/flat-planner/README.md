@@ -46,3 +46,23 @@ via `<iframe>` in a HubSpot dashboard for a sales demo — no backend, no build 
 
 Live and demo-ready. All controls verified working inside a cross-origin iframe against the
 production URL (headless-Chrome harness).
+
+## Session log
+
+### 2026-07-23 — build & Blinkplan modeling
+- Reviewed the initial PRD + reference screenshot; corrected the layout model (wrapping
+  contact-sheet grid, page-number captions, colour/border scheme).
+- Shipped v1 (sales-inventory board), then pivoted to mirror **Blinkplan** after studying a
+  recorded walkthrough: multi-issue editor with clone modes, per-page template library,
+  per-zone content + live preview, Advert flag, workflow Categories, Cover/IFC/IBC/Back naming.
+- Added high-impact features (v3): full template library, **Sections calculator**,
+  **Ads/Content-to-be-Placed** pool, editable Categories, display settings, Print/PDF.
+- **Fixed a real iframe bug:** native `prompt`/`confirm`/`alert` are suppressed in cross-origin
+  iframes, so + Pages / Insert / Copy / Delete / Reset were dead in the HubSpot embed. Replaced
+  with in-page modals; verified all 25 controls against the live URL in a cross-origin iframe.
+
+### 2026-07-27 — dashboard + close-out
+- Added the tool as its own **projects-dashboard card** (metadata-only; app stays at repo root
+  so the iframe URL is stable). CI regenerated the dashboard; card is live.
+- Backlog captured: "open in new tab to print" fallback, optional Blinkplan parity, and the
+  HubSpot custom-objects production path.
